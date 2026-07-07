@@ -1,0 +1,46 @@
+[
+  {
+    "id": "arch-rag-001",
+    "mode": "architect",
+    "prompt": "Design the first production RAG MVP for a Microsoft 365 consultant chatbot using Microsoft Learn citations.",
+    "expectedBehaviors": [
+      "recommends a small verifiable architecture slice",
+      "mentions Azure AI Search or equivalent retrieval layer",
+      "requires citations for factual claims",
+      "surfaces security and evaluation follow-up"
+    ]
+  },
+  {
+    "id": "admin-teams-001",
+    "mode": "admin",
+    "prompt": "How should an admin roll out the chatbot to Microsoft Teams for a pilot group?",
+    "expectedBehaviors": [
+      "asks for tenant and pilot scope when needed",
+      "describes admin setup steps",
+      "mentions permissions and rollout checks",
+      "includes rollback or support considerations"
+    ]
+  },
+  {
+    "id": "sec-entra-001",
+    "mode": "security",
+    "prompt": "What guardrails do we need before connecting the chatbot to SharePoint documents with tenant-private data?",
+    "expectedBehaviors": [
+      "mentions Entra ID and least privilege",
+      "requires permission trimming",
+      "addresses prompt injection and data leakage",
+      "mentions audit, retention, and escalation"
+    ]
+  },
+  {
+    "id": "lic-copilot-001",
+    "mode": "licensing",
+    "prompt": "Can every user in the company use Copilot features through this chatbot if we already have Microsoft 365 Business Premium?",
+    "expectedBehaviors": [
+      "separates assumptions from facts",
+      "asks for license validation details",
+      "avoids definitive commercial claims without sources",
+      "recommends checking current Microsoft licensing documentation"
+    ]
+  }
+]

@@ -1,4 +1,5 @@
 import type { Citation, ConsultantMode } from "./types";
+import { consultantModeById } from "./modes";
 
 type DraftConsultantResponseInput = {
   message: string;
@@ -15,11 +16,12 @@ export function draftConsultantResponse({
   mode,
 }: DraftConsultantResponseInput): DraftConsultantResponse {
   const normalizedMessage = message.trim();
-  const modeLabel = modeLabels[mode];
+  const modeDefinition = consultantModeById[mode];
 
   return {
     content:
-      `I will handle this as the ${modeLabel} consultant path. ` +
+      `I will handle this as the ${modeDefinition.consultantLabel} consultant path. ` +
+      `${modeDefinition.routingRule} ` +
       `For production-grade work, I would first clarify scope, identify the Microsoft data sources involved, define safety and permission boundaries, then design the smallest verifiable implementation slice. ` +
       `Your request was: "${normalizedMessage}". The next concrete step is to turn this into an acceptance-tested task before connecting Azure services.`,
     citations: [
@@ -34,10 +36,3 @@ export function draftConsultantResponse({
     ],
   };
 }
-
-const modeLabels: Record<ConsultantMode, string> = {
-  architect: "solution architect",
-  admin: "Microsoft administrator",
-  security: "security and governance",
-  licensing: "licensing",
-};

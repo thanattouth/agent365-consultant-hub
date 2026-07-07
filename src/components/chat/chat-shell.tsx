@@ -22,11 +22,8 @@ import {
 import { FormEvent, useMemo, useState } from "react";
 
 import { MessageBubble } from "@/components/chat/message-bubble";
-import {
-  consultantModes,
-  conversations,
-  initialMessages,
-} from "@/lib/chat/mock-data";
+import { consultantModes } from "@/lib/chat/modes";
+import { conversations, initialMessages } from "@/lib/chat/mock-data";
 import type { ChatMessage, ConsultantMode, ConversationSummary } from "@/lib/chat/types";
 
 const iconByConversation: Record<ConversationSummary["icon"], typeof BotMessageSquare> = {

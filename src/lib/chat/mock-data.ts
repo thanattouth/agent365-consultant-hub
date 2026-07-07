@@ -1,46 +1,4 @@
-import type { ChatMessage, ConversationSummary, ConsultantMode } from "./types";
-
-export const consultantModes: Array<{
-  id: ConsultantMode;
-  label: string;
-  description: string;
-  bestFor: string;
-  outcome: string;
-  readiness: string;
-}> = [
-  {
-    id: "architect",
-    label: "Architect",
-    description: "Designs Microsoft-first solution architecture and trade-offs.",
-    bestFor: "Architecture, RAG design, integrations, migration paths.",
-    outcome: "Produces options, trade-offs, risks, and implementation slices.",
-    readiness: "Default for build planning",
-  },
-  {
-    id: "admin",
-    label: "Admin",
-    description: "Guides Microsoft 365, Teams, SharePoint, and Azure operations.",
-    bestFor: "Tenant operations, configuration, rollout, and troubleshooting.",
-    outcome: "Produces admin steps, checks, dependencies, and rollback notes.",
-    readiness: "Use for operational tasks",
-  },
-  {
-    id: "security",
-    label: "Security",
-    description: "Focuses on identity, governance, compliance, and safe rollout.",
-    bestFor: "Entra ID, data protection, permissions, audit, and compliance.",
-    outcome: "Produces controls, threat assumptions, guardrails, and escalation points.",
-    readiness: "Use before production release",
-  },
-  {
-    id: "licensing",
-    label: "Licensing",
-    description: "Explains license fit, assumptions, and validation questions.",
-    bestFor: "Plan comparison, SKU assumptions, cost fit, and entitlement checks.",
-    outcome: "Produces assumptions, validation questions, and decision notes.",
-    readiness: "Use with source validation",
-  },
-];
+import type { ChatMessage, ConversationSummary } from "./types";
 
 export const conversations: ConversationSummary[] = [
   {

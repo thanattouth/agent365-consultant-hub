@@ -4,6 +4,29 @@
 
 ### Changed
 
+- Added a shared consultant mode registry used by both UI and API response drafting.
+- Removed duplicated mode labels from the mock data and consultant response path.
+- Added a consultant mode routing policy document.
+- Added an initial benchmark seed dataset for future evaluation work.
+
+### Why
+
+Mode routing is part of the production contract. Keeping mode metadata in one place reduces drift between the UI, API behavior, documentation, and future evaluation datasets.
+
+### Verified
+
+- `npm run lint` passed.
+- `npm run typecheck` passed.
+- `npm run build` passed.
+- Local API smoke test for `security` mode returned 200 and included the shared routing rule in the assistant response.
+
+### Risks And Follow-Up
+
+- Benchmark seed data is not executed by an automated evaluator yet.
+- Future work should add an evaluation runner that checks mode fit, groundedness, citation behavior, and safety behavior.
+
+### Changed
+
 - Replaced the larger consultant mode card panel with a compact segmented mode switcher.
 - Kept production mode guidance available through button titles and the current focus summary instead of dense selector content.
 - Updated the active mode summary to show the expected production outcome for the selected path.
