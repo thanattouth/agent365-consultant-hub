@@ -130,7 +130,7 @@ button {
 .command-button,
 .ghost-button,
 .history-item,
-.mode-card {
+.mode-switch-button {
   border: 0;
   cursor: pointer;
   transition:
@@ -142,7 +142,7 @@ button {
 .command-button:active,
 .icon-button:active,
 .send-button:active,
-.mode-card:active {
+.mode-switch-button:active {
   transform: scale(0.96);
 }
 
@@ -281,101 +281,40 @@ button {
   display: none;
 }
 
-.mode-panel {
-  width: min(100% - 48px, 1120px);
-  margin: 18px auto 0;
-  border-radius: 20px;
-  padding: 18px;
-  background: rgba(246, 249, 255, 0.78);
+.mode-switcher-wrap {
+  display: flex;
+  justify-content: center;
+  padding: 18px 24px 0;
 }
 
-.mode-panel-header {
+.mode-switcher {
   display: grid;
-  grid-template-columns: minmax(220px, 0.85fr) 1fr;
-  gap: 16px;
-  align-items: end;
-  margin-bottom: 14px;
-}
-
-.mode-panel-header h3 {
-  margin: 2px 0 0;
-  color: var(--primary);
-  font-size: 20px;
-  line-height: 26px;
-}
-
-.mode-panel-header p {
-  margin: 0;
-  color: var(--muted);
-  line-height: 1.45;
-}
-
-.mode-grid {
-  display: grid;
+  width: min(100%, 840px);
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 12px;
+  border-radius: 18px;
+  background: rgba(246, 249, 255, 0.7);
+  padding: 8px;
 }
 
-.mode-card {
-  display: grid;
-  min-height: 132px;
-  gap: 10px;
-  align-content: start;
-  border-radius: 18px;
+.mode-switch-button {
+  display: flex;
+  min-width: 0;
+  min-height: 50px;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  border-radius: 14px;
   background: transparent;
   color: var(--muted);
-  padding: 16px;
-  text-align: left;
-}
-
-.mode-card:hover {
-  color: var(--primary);
-}
-
-.mode-card.active {
-  color: var(--primary);
-}
-
-.mode-card-topline {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-}
-
-.mode-title {
-  color: var(--text);
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 900;
+  white-space: nowrap;
 }
 
-.mode-card.active .mode-title {
+.mode-switch-button:hover,
+.mode-switch-button.active {
   color: var(--primary);
-}
-
-.mode-status-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 999px;
-  background: rgba(89, 97, 114, 0.45);
-}
-
-.mode-description {
-  color: var(--muted);
-  font-size: 13px;
-  font-weight: 650;
-  line-height: 1.42;
-}
-
-.mode-outcome {
-  width: fit-content;
-  border-radius: 999px;
-  background: rgba(25, 79, 215, 0.09);
-  color: var(--primary-strong);
-  font-size: 11px;
-  font-weight: 900;
-  line-height: 1.1;
-  padding: 7px 9px;
 }
 
 .conversation {
@@ -572,26 +511,9 @@ button {
     grid-template-columns: 1fr;
   }
 
-  .mode-panel {
-    width: calc(100% - 32px);
-  }
-
-  .mode-panel-header {
-    grid-template-columns: 1fr;
-    align-items: start;
-  }
-
-  .mode-grid {
-    display: flex;
-    gap: 12px;
+  .mode-switcher {
     overflow-x: auto;
-    padding: 2px 4px 10px;
-    scroll-snap-type: x mandatory;
-  }
-
-  .mode-card {
-    min-width: 244px;
-    scroll-snap-align: start;
+    grid-template-columns: repeat(4, minmax(132px, 1fr));
   }
 
   .message-bubble {
@@ -631,26 +553,16 @@ button {
 
 @media (max-width: 560px) {
   .topbar,
-  .mode-panel,
+  .mode-switcher-wrap,
   .conversation,
   .composer-wrap {
     padding-right: 16px;
     padding-left: 16px;
   }
 
-  .mode-panel {
+  .mode-switcher-wrap {
     margin-top: 16px;
-    padding-top: 16px;
-    padding-bottom: 16px;
-  }
-
-  .mode-panel-header h3 {
-    font-size: 18px;
-    line-height: 24px;
-  }
-
-  .mode-card {
-    min-width: 232px;
+    padding-top: 0;
   }
 
   .topbar h2 {

@@ -4,22 +4,22 @@
 
 ### Changed
 
-- Replaced the simple mode pill selector with a production-oriented consultant mode panel.
-- Added mode selection guidance for when to use Architect, Admin, Security, and Licensing paths.
+- Replaced the larger consultant mode card panel with a compact segmented mode switcher.
+- Kept production mode guidance available through button titles and the current focus summary instead of dense selector content.
 - Updated the active mode summary to show the expected production outcome for the selected path.
 
 ### Why
 
-Mode choice affects answer scope, auditability, evaluation, and safety. The UI should guide users toward the right consultant path instead of making mode selection feel decorative.
+Mode choice affects answer scope, auditability, evaluation, and safety, but the selector should stay lightweight enough for frequent chat use.
 
 ### Verified
 
 - `npm run lint` passed.
 - `npm run typecheck` passed.
 - `npm run build` passed.
-- Browser desktop check confirmed the mode panel renders 4 consultant cards, shows the active Architect mode, and includes production outcome text.
+- Browser desktop check confirmed the compact switcher renders 4 consultant mode buttons, shows the active Architect mode, and includes production outcome text in the current focus summary.
 - Browser interaction check confirmed selecting Security updates the active mode and current focus summary.
-- Mobile viewport check at 390x844 confirmed sidebar is hidden, mobile navigation is visible, the mode card rail is scrollable, and the composer remains present.
+- Mobile viewport check at 390x844 confirmed sidebar is hidden, mobile navigation is visible, the compact mode switcher remains usable, and the composer remains present.
 
 ### Risks And Follow-Up
 

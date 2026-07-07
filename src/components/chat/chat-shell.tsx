@@ -1,12 +1,13 @@
 "use client";
 
 import {
+  BadgeDollarSign,
   BotMessageSquare,
-  CheckCircle2,
   Cloud,
   History,
   Menu,
   Mic,
+  Network,
   Paperclip,
   Plus,
   Send,
@@ -15,6 +16,7 @@ import {
   SlidersHorizontal,
   Sparkles,
   Trash2,
+  Wrench,
   Workflow,
 } from "lucide-react";
 import { FormEvent, useMemo, useState } from "react";
@@ -32,6 +34,13 @@ const iconByConversation: Record<ConversationSummary["icon"], typeof BotMessageS
   cloud: Cloud,
   shield: ShieldCheck,
   workflow: Workflow,
+};
+
+const iconByMode: Record<ConsultantMode, typeof Network> = {
+  architect: Network,
+  admin: Wrench,
+  security: ShieldCheck,
+  licensing: BadgeDollarSign,
 };
 
 export function ChatShell() {
@@ -168,38 +177,22 @@ export function ChatShell() {
           </div>
         </header>
 
-        <section className="mode-panel raised" aria-label="Consultant mode selection">
-          <div className="mode-panel-header">
-            <div>
-              <p className="eyebrow">Production mode routing</p>
-              <h3>Choose the consultant path before asking</h3>
-            </div>
-            <p>
-              Pick the mode that matches the decision risk. This keeps answers scoped,
-              auditable, and easier to evaluate before release.
-            </p>
-          </div>
-          <div className="mode-grid" role="list">
+        <section className="mode-switcher-wrap" aria-label="Consultant mode selection">
+          <div className="mode-switcher raised" role="list">
             {consultantModes.map((item) => {
               const isActive = item.id === mode;
+              const Icon = iconByMode[item.id];
               return (
                 <button
                   aria-pressed={isActive}
-                  className={`mode-card ${isActive ? "active sunken-sm" : "raised-sm"}`}
+                  className={`mode-switch-button ${isActive ? "active sunken-sm" : ""}`}
                   key={item.id}
                   onClick={() => setMode(item.id)}
+                  title={`${item.label}: ${item.bestFor}`}
                   type="button"
                 >
-                  <span className="mode-card-topline">
-                    <span className="mode-title">{item.label}</span>
-                    {isActive ? (
-                      <CheckCircle2 size={18} aria-hidden="true" />
-                    ) : (
-                      <span className="mode-status-dot" aria-hidden="true" />
-                    )}
-                  </span>
-                  <span className="mode-description">{item.bestFor}</span>
-                  <span className="mode-outcome">{item.readiness}</span>
+                  <Icon size={19} aria-hidden="true" />
+                  <span>{item.label}</span>
                 </button>
               );
             })}
