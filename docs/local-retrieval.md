@@ -10,6 +10,7 @@ The local retriever is the first retrieval adapter for Agent365. It makes the ch
 - `src/lib/retrieval/knowledge-base.ts` contains small Microsoft-focused seed sources.
 - `src/lib/retrieval/retriever.ts` scores sources deterministically by mode and keyword matches.
 - `src/lib/retrieval/citations.ts` converts retrieval results into chat citations.
+- The Azure OpenAI provider also uses this adapter as a pre-model grounding step until Azure AI Search is connected.
 
 ## Knowledge Source Fields
 
@@ -25,7 +26,7 @@ The local retriever is the first retrieval adapter for Agent365. It makes the ch
 
 ## Production Path
 
-This adapter is intentionally simple. Future Azure AI Search work should preserve the same conceptual output shape: ranked sources, scores, matched signals, sensitivity, and citation metadata.
+This adapter is intentionally simple. It now supports both deterministic local responses and live Azure OpenAI pre-grounding. Future Azure AI Search work should preserve the same conceptual output shape: ranked sources, scores, matched signals, sensitivity, and citation metadata.
 
 ## Guardrails
 

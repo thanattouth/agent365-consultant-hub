@@ -4,6 +4,70 @@
 
 ### Changed
 
+- Updated architecture notes to reflect the current Azure OpenAI runtime path.
+- Documented that Azure OpenAI uses local retrieval grounding and citation trace metadata until Azure AI Search replaces the adapter.
+- Updated boundary decisions and next architecture work to remove completed items and surface Azure AI Search, managed identity, live provider tests, hard-block policy, and telemetry export.
+
+### Why
+
+The architecture notes still described the application as a mock consultant API even though the implementation now has provider routing, Azure OpenAI execution, retrieval grounding, guardrail metadata, sanitized provider errors, and structured trace metadata.
+
+### Verified
+
+- `npm.cmd run lint` passed.
+- `npm.cmd run typecheck` passed.
+- `npm.cmd run build` passed.
+
+### Risks And Follow-Up
+
+- Architecture notes remain intentionally high level; implementation-specific provider behavior should continue to live in provider and retrieval docs.
+
+### Changed
+
+- Reintroduced retrieval grounding around the Azure OpenAI provider path.
+- Added local retrieval citations, retrieval trace metadata, confidence scoring, and follow-up questions to Azure provider responses.
+- Injected matched trusted source snippets into the Azure OpenAI prompt so live responses can use the same grounded source set returned in the API contract.
+- Documented that Azure OpenAI uses the local retrieval adapter until Azure AI Search replaces it.
+
+### Why
+
+The normal runtime path now uses Azure OpenAI, but consultant-grade answers still need citations and traceable evidence. Reusing the existing local retrieval adapter keeps the Azure path grounded and contract-compatible before the production Azure AI Search adapter is connected.
+
+### Verified
+
+- `npm.cmd run lint` passed.
+- `npm.cmd run typecheck` passed.
+- `npm.cmd run build` passed.
+
+### Risks And Follow-Up
+
+- Grounding still depends on keyword-based local retrieval, so coverage is limited to seeded sources.
+- The model is instructed to cite only returned source titles, but citation fidelity still needs live integration tests and benchmark coverage for Azure responses.
+- Replace this adapter with Azure AI Search while preserving the citation and trace contract.
+
+### Changed
+
+- Added a provider execution error guard for Azure OpenAI failures.
+- Updated the chat API to return sanitized `502` responses for provider execution failures.
+- Kept raw provider failure details out of client responses while preserving request IDs and structured log categories.
+
+### Why
+
+Live model calls can fail independently of application validation or configuration. The API should distinguish upstream provider execution failures from unhandled server errors so production debugging can start from a clear, safe status and `requestId`.
+
+### Verified
+
+- `npm.cmd run lint` passed.
+- `npm.cmd run typecheck` passed.
+- `npm.cmd run build` passed.
+
+### Risks And Follow-Up
+
+- Provider execution details are still not exported to Application Insights; production telemetry should capture safe provider status metadata without raw prompts, secrets, or full provider payloads.
+- Azure responses are still not retrieval-grounded; re-introduce citations around the Azure provider path next.
+
+### Changed
+
 - Added production-style chat interaction animation.
 - Added an assistant typing indicator while the chat provider request is in flight.
 - Added send-button loading feedback and automatic scroll-to-latest-message behavior.

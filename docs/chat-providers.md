@@ -29,6 +29,8 @@ Provider id: `azure-openai`
 
 The Azure provider calls Azure OpenAI chat completions over REST. It validates required environment variables and returns a clear service error when selected without configuration.
 
+Before the model call, the provider runs the local retrieval adapter and injects matched trusted source snippets as grounding instructions. The response contract returns those retrieval results as citations and trace metadata. This keeps the live Azure path citation-aware while Azure AI Search is still a future production adapter.
+
 Required configuration:
 
 ```bash
@@ -60,4 +62,4 @@ Every assistant response includes:
 
 - Add managed identity support.
 - Add provider-specific live integration tests in a controlled environment.
-- Re-introduce retrieval grounding around Azure responses when moving back toward consultant-grade RAG.
+- Replace the local retrieval adapter with Azure AI Search while preserving the citation and trace output shape.

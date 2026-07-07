@@ -1,4 +1,9 @@
 import { chatContractVersion } from "@/lib/chat/contracts";
+import type { ConsultantMode, SafetyLevel } from "@/lib/chat/types";
+import { citationsFromRetrieval } from "@/lib/retrieval/citations";
+import { retrieveLocalKnowledge } from "@/lib/retrieval/retriever";
+import { traceFromRetrieval } from "@/lib/retrieval/trace";
+import type { RetrievalResult } from "@/lib/retrieval/types";
 import { classifyInputSafety } from "@/lib/safety/guardrails";
 
 import type {
@@ -48,31 +53,44 @@ export const azureOpenAiChatProvider: ChatAnswerProvider = {
       message: input.message,
       mode: input.mode,
     });
-    const content = await callAzureOpenAiChatCompletions(config, buildMessages(input));
+    const retrievalResults = retrieveLocalKnowledge({
+      query: input.message,
+      mode: input.mode,
+    });
+    const citations = citationsFromRetrieval(retrievalResults);
+    const safetyLevel = getSafetyLevel({
+      mode: input.mode,
+      hasGuardrailRisk: guardrails.status !== "pass",
+    });
+    const confidence = getConfidence(retrievalResults.length);
+    const content = await callAzureOpenAiChatCompletions(
+      config,
+      buildMessages(input, retrievalResults),
+    );
 
     return {
       content,
-      citations: [],
-      retrievalResults: [],
+      citations,
+      retrievalResults,
       mode: input.mode,
-      confidence: 0.7,
-      requiresCitation: false,
-      safetyLevel: guardrails.status === "pass" ? "standard" : "sensitive",
+      confidence,
+      requiresCitation: true,
+      safetyLevel,
       guardrails,
-      followUpQuestions: [],
+      followUpQuestions: followUpQuestionsByMode[input.mode],
       contractVersion: chatContractVersion,
       provider: "azure-openai",
       trace: {
         provider: "azure-openai",
         mode: input.mode,
-        retrievalResultCount: 0,
-        citationCount: 0,
-        confidence: 0.7,
-        safetyLevel: guardrails.status === "pass" ? "standard" : "sensitive",
+        retrievalResultCount: retrievalResults.length,
+        citationCount: citations.length,
+        confidence,
+        safetyLevel,
         guardrailStatus: guardrails.status,
         riskFlags: guardrails.riskFlags,
         requiresHumanReview: guardrails.requiresHumanReview,
-        retrieval: [],
+        retrieval: traceFromRetrieval(retrievalResults),
       },
     };
   },
@@ -111,7 +129,14 @@ export function isProviderConfigurationError(error: unknown): error is ChatProvi
   return error instanceof ChatProviderConfigurationError;
 }
 
-function buildMessages(input: DraftConsultantResponseInput): AzureChatMessage[] {
+export function isProviderExecutionError(error: unknown): error is ChatProviderExecutionError {
+  return error instanceof ChatProviderExecutionError;
+}
+
+function buildMessages(
+  input: DraftConsultantResponseInput,
+  retrievalResults: RetrievalResult[],
+): AzureChatMessage[] {
   const conversation = (input.messages ?? [])
     .slice(-12)
     .map((message) => ({
@@ -129,6 +154,10 @@ function buildMessages(input: DraftConsultantResponseInput): AzureChatMessage[] 
       content:
         "You are Agent365, a helpful Microsoft-first AI assistant. Answer naturally and concisely. Ask clarifying questions when needed. Do not claim access to private tenant data unless the user provides it in the conversation.",
     },
+    {
+      role: "system",
+      content: formatGroundingInstructions(retrievalResults),
+    },
     ...conversation,
     ...(hasLatestUserMessage
       ? []
@@ -140,6 +169,81 @@ function buildMessages(input: DraftConsultantResponseInput): AzureChatMessage[] 
         ]),
   ];
 }
+
+function formatGroundingInstructions(retrievalResults: RetrievalResult[]): string {
+  if (retrievalResults.length === 0) {
+    return [
+      "No trusted grounding sources matched this request.",
+      "Do not invent citations. If factual Microsoft guidance is needed, state that source validation is required and ask focused follow-up questions.",
+    ].join(" ");
+  }
+
+  const sourceLines = retrievalResults
+    .map(({ source }, index) =>
+      [
+        `[${index + 1}] ${source.title}`,
+        `Source family: ${source.source}.`,
+        `Product: ${source.product}.`,
+        `Scenario: ${source.scenario}.`,
+        `Sensitivity: ${source.sensitivity}.`,
+        `Grounding: ${source.content}`,
+      ].join(" "),
+    )
+    .join("\n");
+
+  return [
+    "Use the trusted grounding sources below when they are relevant.",
+    "Cite source titles inline for factual Microsoft or implementation claims, and do not cite sources that are not listed.",
+    "Separate confirmed guidance from assumptions. If the sources are insufficient, say what must be validated next.",
+    "",
+    sourceLines,
+  ].join("\n");
+}
+
+function getConfidence(retrievalResultCount: number): number {
+  if (retrievalResultCount === 0) {
+    return 0.55;
+  }
+
+  return Math.min(0.78, 0.64 + retrievalResultCount * 0.04);
+}
+
+function getSafetyLevel({
+  mode,
+  hasGuardrailRisk,
+}: {
+  mode: ConsultantMode;
+  hasGuardrailRisk: boolean;
+}): SafetyLevel {
+  if (hasGuardrailRisk || mode === "security") {
+    return "high";
+  }
+
+  if (mode === "licensing") {
+    return "sensitive";
+  }
+
+  return "standard";
+}
+
+const followUpQuestionsByMode: Record<ConsultantMode, string[]> = {
+  architect: [
+    "Which Microsoft workloads and channels are in the first production slice?",
+    "Which sources must be treated as authoritative for citations?",
+  ],
+  admin: [
+    "Which tenant, pilot group, and Teams app distribution path should be assumed?",
+    "Who owns rollout support and rollback approval?",
+  ],
+  security: [
+    "Which data classifications and SharePoint sites are in scope?",
+    "What retention, audit, and escalation requirements apply?",
+  ],
+  licensing: [
+    "Which SKUs and user groups should be validated?",
+    "Which current Microsoft licensing source should be treated as authoritative?",
+  ],
+};
 
 async function callAzureOpenAiChatCompletions(
   config: ConfiguredAzureOpenAiConfig,

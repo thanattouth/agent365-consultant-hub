@@ -2,7 +2,10 @@ import { NextResponse } from "next/server";
 
 import { chatRequestSchema } from "@/lib/chat/contracts";
 import { draftConsultantResponse } from "@/lib/chat/consultant";
-import { isProviderConfigurationError } from "@/lib/chat/providers/azure-openai";
+import {
+  isProviderConfigurationError,
+  isProviderExecutionError,
+} from "@/lib/chat/providers/azure-openai";
 import { logChatEvent } from "@/lib/observability/logger";
 
 export async function POST(request: Request) {
@@ -99,6 +102,24 @@ export async function POST(request: Request) {
           error: error.message,
         },
         { status: 503 },
+      );
+    }
+
+    if (isProviderExecutionError(error)) {
+      logChatEvent({
+        event: "chat.request.failed",
+        requestId,
+        latencyMs,
+        status: 502,
+        errorCategory: "provider_execution",
+      });
+
+      return NextResponse.json(
+        {
+          requestId,
+          error: "The chat provider could not complete this request.",
+        },
+        { status: 502 },
       );
     }
 
