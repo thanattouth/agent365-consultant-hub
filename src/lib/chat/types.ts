@@ -25,6 +25,7 @@ export type ChatMessage = {
   safetyLevel?: SafetyLevel;
   followUpQuestions?: string[];
   contractVersion?: string;
+  provider?: string;
 };
 
 export type ConversationSummary = {

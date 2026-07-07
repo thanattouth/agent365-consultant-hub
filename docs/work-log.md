@@ -4,6 +4,30 @@
 
 ### Changed
 
+- Added a chat provider abstraction with a default `local` provider.
+- Moved deterministic grounded answer composition into the local provider.
+- Added an Azure OpenAI provider scaffold with configuration validation.
+- Added `provider` to the chat response contract and benchmark checks.
+- Documented provider selection and Azure OpenAI integration path.
+
+### Why
+
+The bot can answer locally now, but production work needs a clean boundary for swapping in Azure OpenAI without rewriting the API, UI, evaluation runner, or retrieval layer.
+
+### Verified
+
+- `npm run lint` passed.
+- `npm run typecheck` passed.
+- `npm run build` passed.
+- `npm run eval:benchmark` passed 4/4 benchmark cases with `provider: local`.
+
+### Risks And Follow-Up
+
+- Azure OpenAI live model execution is scaffolded but not implemented.
+- Provider selection is environment-based and should later be included in deployment configuration validation.
+
+### Changed
+
 - Replaced the generic consultant response template with a grounded structured answer composer.
 - Added mode-specific answer plans for Architect, Admin, Security, and Licensing paths.
 - Rendered multiline assistant responses cleanly in the chat UI.

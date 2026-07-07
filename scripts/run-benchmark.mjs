@@ -36,6 +36,10 @@ for (const benchmarkCase of benchmarkCases) {
       failures.push(`Expected contractVersion ${contractVersion}.`);
     }
 
+    if (message.provider !== "local") {
+      failures.push(`Expected local provider, received ${message.provider}.`);
+    }
+
     if (message.mode !== benchmarkCase.mode) {
       failures.push(`Expected mode ${benchmarkCase.mode}, received ${message.mode}.`);
     }

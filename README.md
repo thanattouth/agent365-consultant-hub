@@ -40,3 +40,7 @@ The benchmark runner uses `http://127.0.0.1:3000` by default. Override with `AGE
 ## Project Charter
 
 Read `SKILL.md` before meaningful project work. It defines the delivery phases, production-grade scorecard, engineering rules, debugging principles, security principles, work logging policy, and Conventional Commit policy.
+
+## Chat Provider
+
+The default answer provider is `local`, which returns deterministic grounded answers from the local retrieval adapter. See `docs/chat-providers.md` for the Azure OpenAI provider scaffold.

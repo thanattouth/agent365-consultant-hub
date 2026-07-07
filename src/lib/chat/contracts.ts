@@ -28,6 +28,7 @@ export const assistantMessageSchema = z.object({
   safetyLevel: z.enum(["standard", "sensitive", "high"]),
   followUpQuestions: z.array(z.string().min(1)),
   contractVersion: z.literal(chatContractVersion),
+  provider: z.enum(["local", "azure-openai"]),
 });
 
 export const chatResponseSchema = z.object({

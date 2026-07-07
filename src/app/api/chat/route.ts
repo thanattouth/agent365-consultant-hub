@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { chatRequestSchema } from "@/lib/chat/contracts";
 import { draftConsultantResponse } from "@/lib/chat/consultant";
+import { isProviderConfigurationError } from "@/lib/chat/providers/azure-openai";
 
 export async function POST(request: Request) {
   const requestId = crypto.randomUUID();
@@ -20,7 +21,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const response = draftConsultantResponse(parsed.data);
+    const response = await draftConsultantResponse(parsed.data);
 
     return NextResponse.json({
       requestId,
@@ -36,10 +37,21 @@ export async function POST(request: Request) {
         safetyLevel: response.safetyLevel,
         followUpQuestions: response.followUpQuestions,
         contractVersion: response.contractVersion,
+        provider: response.provider,
         createdAt: new Date().toISOString(),
       },
     });
-  } catch {
+  } catch (error) {
+    if (isProviderConfigurationError(error)) {
+      return NextResponse.json(
+        {
+          requestId,
+          error: error.message,
+        },
+        { status: 503 },
+      );
+    }
+
     return NextResponse.json(
       {
         requestId,
