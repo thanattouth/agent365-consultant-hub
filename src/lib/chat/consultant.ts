@@ -1,6 +1,9 @@
 import { chatContractVersion } from "./contracts";
 import { consultantModeById } from "./modes";
 import type { Citation, ConsultantMode, SafetyLevel } from "./types";
+import { citationsFromRetrieval } from "@/lib/retrieval/citations";
+import { retrieveLocalKnowledge } from "@/lib/retrieval/retriever";
+import type { RetrievalResult } from "@/lib/retrieval/types";
 
 type DraftConsultantResponseInput = {
   message: string;
@@ -10,6 +13,7 @@ type DraftConsultantResponseInput = {
 type DraftConsultantResponse = {
   content: string;
   citations: Citation[];
+  retrievalResults: RetrievalResult[];
   mode: ConsultantMode;
   confidence: number;
   requiresCitation: boolean;
@@ -25,24 +29,22 @@ export function draftConsultantResponse({
   const normalizedMessage = message.trim();
   const modeDefinition = consultantModeById[mode];
   const modeGuidance = responseGuidanceByMode[mode];
+  const retrievalResults = retrieveLocalKnowledge({
+    query: normalizedMessage,
+    mode,
+  });
+  const retrievedContext = formatRetrievedContext(retrievalResults);
 
   return {
     content:
       `I will handle this as the ${modeDefinition.consultantLabel} consultant path. ` +
       `${modeDefinition.routingRule} ` +
       `${modeGuidance} ` +
+      `${retrievedContext} ` +
       `For production-grade work, I would first clarify scope, identify the Microsoft data sources involved, define safety and permission boundaries, then design the smallest verifiable implementation slice. ` +
       `Your request was: "${normalizedMessage}". The next concrete step is to turn this into an acceptance-tested task before connecting Azure services.`,
-    citations: [
-      {
-        title: "Agent365 operating principles",
-        source: "SKILL.md",
-      },
-      {
-        title: "Production-grade scorecard",
-        source: "SKILL.md",
-      },
-    ],
+    citations: citationsFromRetrieval(retrievalResults),
+    retrievalResults,
     mode,
     confidence: confidenceByMode[mode],
     requiresCitation: true,
@@ -62,6 +64,18 @@ const responseGuidanceByMode: Record<ConsultantMode, string> = {
   licensing:
     "The answer should separate assumptions from facts, ask for license validation details, avoid definitive commercial claims without sources, and recommend checking current Microsoft licensing documentation.",
 };
+
+function formatRetrievedContext(results: RetrievalResult[]): string {
+  if (results.length === 0) {
+    return "No local knowledge source matched strongly yet, so this response should be treated as planning guidance until retrieval is expanded.";
+  }
+
+  const sourceSummary = results
+    .map(({ source }) => `${source.title} (${source.product})`)
+    .join("; ");
+
+  return `Local retrieval matched ${results.length} knowledge source(s): ${sourceSummary}.`;
+}
 
 const confidenceByMode: Record<ConsultantMode, number> = {
   architect: 0.72,

@@ -56,6 +56,16 @@ for (const benchmarkCase of benchmarkCases) {
       failures.push("Expected at least one citation.");
     }
 
+    const citationTitles = Array.isArray(message.citations)
+      ? message.citations.map((citation) => String(citation.title ?? "").toLowerCase())
+      : [];
+
+    for (const title of benchmarkCase.assertions.expectedCitationTitles ?? []) {
+      if (!citationTitles.includes(title.toLowerCase())) {
+        failures.push(`Missing expected citation: ${title}`);
+      }
+    }
+
     if (!Array.isArray(message.followUpQuestions) || message.followUpQuestions.length === 0) {
       failures.push("Expected at least one follow-up question.");
     }

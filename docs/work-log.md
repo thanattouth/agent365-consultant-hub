@@ -4,6 +4,30 @@
 
 ### Changed
 
+- Added a local retrieval schema, seeded Microsoft knowledge sources, deterministic retriever, and citation mapper.
+- Connected consultant response drafting to local retrieval so API citations come from retrieved knowledge sources.
+- Added benchmark assertions for expected citation titles.
+- Documented the local retrieval adapter and future Azure AI Search path.
+
+### Why
+
+Grounded answers need a retrieval surface before real Azure AI Search integration. A deterministic local adapter lets us test citation behavior, retrieval drift, and response contracts while keeping the system easy to debug.
+
+### Verified
+
+- `npm run lint` passed.
+- `npm run typecheck` passed.
+- `npm run build` passed.
+- `npm run eval:benchmark` passed 4/4 benchmark cases, including expected citation title assertions.
+
+### Risks And Follow-Up
+
+- Local retrieval uses simple keyword scoring and is not a replacement for Azure AI Search.
+- Permission trimming is modeled in schema only; enforcement must be added before tenant-private data is connected.
+- Future work should expose retrieval trace metadata for observability.
+
+### Changed
+
 - Added a structured chat response contract with mode, confidence, citation requirement, safety level, follow-up questions, and contract version metadata.
 - Moved chat request and response validation schemas into a shared contract module.
 - Added a benchmark runner that calls the chat API and validates response contract fields plus benchmark phrase assertions.
