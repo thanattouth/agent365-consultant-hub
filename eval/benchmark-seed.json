@@ -8,7 +8,15 @@
       "mentions Azure AI Search or equivalent retrieval layer",
       "requires citations for factual claims",
       "surfaces security and evaluation follow-up"
-    ]
+    ],
+    "assertions": {
+      "mustContain": [
+        "small verifiable architecture slice",
+        "Azure AI Search",
+        "citations for factual claims",
+        "security plus evaluation follow-up"
+      ]
+    }
   },
   {
     "id": "admin-teams-001",
@@ -19,7 +27,15 @@
       "describes admin setup steps",
       "mentions permissions and rollout checks",
       "includes rollback or support considerations"
-    ]
+    ],
+    "assertions": {
+      "mustContain": [
+        "tenant and pilot scope",
+        "admin setup steps",
+        "permissions and rollout checks",
+        "rollback or support considerations"
+      ]
+    }
   },
   {
     "id": "sec-entra-001",
@@ -30,7 +46,15 @@
       "requires permission trimming",
       "addresses prompt injection and data leakage",
       "mentions audit, retention, and escalation"
-    ]
+    ],
+    "assertions": {
+      "mustContain": [
+        "Entra ID and least privilege",
+        "permission trimming",
+        "prompt injection and data leakage",
+        "audit, retention, and escalation"
+      ]
+    }
   },
   {
     "id": "lic-copilot-001",
@@ -41,6 +65,14 @@
       "asks for license validation details",
       "avoids definitive commercial claims without sources",
       "recommends checking current Microsoft licensing documentation"
-    ]
+    ],
+    "assertions": {
+      "mustContain": [
+        "separate assumptions from facts",
+        "license validation details",
+        "avoid definitive commercial claims without sources",
+        "current Microsoft licensing documentation"
+      ]
+    }
   }
 ]

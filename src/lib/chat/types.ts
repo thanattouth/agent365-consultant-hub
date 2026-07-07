@@ -1,5 +1,11 @@
 export type ChatRole = "user" | "assistant" | "system";
 
+export const consultantModeIds = ["architect", "admin", "security", "licensing"] as const;
+
+export type ConsultantMode = (typeof consultantModeIds)[number];
+
+export type SafetyLevel = "standard" | "sensitive" | "high";
+
 export type Citation = {
   title: string;
   source: string;
@@ -13,6 +19,12 @@ export type ChatMessage = {
   content: string;
   createdAt: string;
   citations?: Citation[];
+  mode?: ConsultantMode;
+  confidence?: number;
+  requiresCitation?: boolean;
+  safetyLevel?: SafetyLevel;
+  followUpQuestions?: string[];
+  contractVersion?: string;
 };
 
 export type ConversationSummary = {
@@ -21,5 +33,3 @@ export type ConversationSummary = {
   icon: "chat" | "cloud" | "shield" | "workflow";
   updatedAt: string;
 };
-
-export type ConsultantMode = "architect" | "admin" | "security" | "licensing";

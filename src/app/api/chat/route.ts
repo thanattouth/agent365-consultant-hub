@@ -1,12 +1,7 @@
 import { NextResponse } from "next/server";
-import { z } from "zod";
 
+import { chatRequestSchema } from "@/lib/chat/contracts";
 import { draftConsultantResponse } from "@/lib/chat/consultant";
-
-const chatRequestSchema = z.object({
-  message: z.string().trim().min(1).max(4000),
-  mode: z.enum(["architect", "admin", "security", "licensing"]),
-});
 
 export async function POST(request: Request) {
   const requestId = crypto.randomUUID();
@@ -35,6 +30,12 @@ export async function POST(request: Request) {
         author: "Agent365",
         content: response.content,
         citations: response.citations,
+        mode: response.mode,
+        confidence: response.confidence,
+        requiresCitation: response.requiresCitation,
+        safetyLevel: response.safetyLevel,
+        followUpQuestions: response.followUpQuestions,
+        contractVersion: response.contractVersion,
         createdAt: new Date().toISOString(),
       },
     });

@@ -4,6 +4,30 @@
 
 ### Changed
 
+- Added a structured chat response contract with mode, confidence, citation requirement, safety level, follow-up questions, and contract version metadata.
+- Moved chat request and response validation schemas into a shared contract module.
+- Added a benchmark runner that calls the chat API and validates response contract fields plus benchmark phrase assertions.
+- Added an `eval:benchmark` npm script.
+- Documented benchmark execution in the README.
+
+### Why
+
+Production-grade chatbot work needs measurable quality gates before real model and RAG integrations are added. A structured response contract gives the UI, API, telemetry, and evaluator a stable surface to build on.
+
+### Verified
+
+- `npm run lint` passed.
+- `npm run typecheck` passed.
+- `npm run build` passed.
+- `npm run eval:benchmark` passed 4/4 benchmark cases against the local dev server.
+
+### Risks And Follow-Up
+
+- The benchmark runner currently checks deterministic mock API responses; future work should add model-based groundedness and safety evaluation.
+- The eval script expects a running API server and should later support CI startup orchestration.
+
+### Changed
+
 - Added a shared consultant mode registry used by both UI and API response drafting.
 - Removed duplicated mode labels from the mock data and consultant response path.
 - Added a consultant mode routing policy document.
