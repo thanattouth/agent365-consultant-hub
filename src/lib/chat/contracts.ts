@@ -24,6 +24,18 @@ export const chatTraceSchema = z.object({
   citationCount: z.number().int().nonnegative(),
   confidence: z.number().min(0).max(1),
   safetyLevel: z.enum(["standard", "sensitive", "high"]),
+  guardrailStatus: z.enum(["pass", "review", "block"]),
+  riskFlags: z.array(
+    z.enum([
+      "prompt_injection",
+      "secret_request",
+      "permission_bypass",
+      "destructive_admin_action",
+      "licensing_certainty",
+      "production_risk",
+    ]),
+  ),
+  requiresHumanReview: z.boolean(),
   retrieval: z.array(
     z.object({
       id: z.string().min(1),
@@ -49,6 +61,18 @@ export const assistantMessageSchema = z.object({
   confidence: z.number().min(0).max(1),
   requiresCitation: z.boolean(),
   safetyLevel: z.enum(["standard", "sensitive", "high"]),
+  guardrailStatus: z.enum(["pass", "review", "block"]),
+  riskFlags: z.array(
+    z.enum([
+      "prompt_injection",
+      "secret_request",
+      "permission_bypass",
+      "destructive_admin_action",
+      "licensing_certainty",
+      "production_risk",
+    ]),
+  ),
+  requiresHumanReview: z.boolean(),
   followUpQuestions: z.array(z.string().min(1)),
   contractVersion: z.literal(chatContractVersion),
   provider: z.enum(["local", "azure-openai"]),

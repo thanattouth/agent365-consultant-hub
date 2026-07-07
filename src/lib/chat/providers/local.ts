@@ -5,6 +5,8 @@ import { citationsFromRetrieval } from "@/lib/retrieval/citations";
 import { retrieveLocalKnowledge } from "@/lib/retrieval/retriever";
 import { traceFromRetrieval } from "@/lib/retrieval/trace";
 import type { RetrievalResult } from "@/lib/retrieval/types";
+import { classifyInputSafety } from "@/lib/safety/guardrails";
+import type { GuardrailResult } from "@/lib/safety/types";
 
 import type {
   ChatAnswerProvider,
@@ -32,6 +34,10 @@ function draftLocalConsultantResponse({
   const citations = citationsFromRetrieval(retrievalResults);
   const confidence = confidenceByMode[mode];
   const safetyLevel = safetyLevelByMode[mode];
+  const guardrails = classifyInputSafety({
+    message: normalizedMessage,
+    mode,
+  });
 
   return {
     content: composeGroundedAnswer({
@@ -40,6 +46,7 @@ function draftLocalConsultantResponse({
       consultantLabel: modeDefinition.consultantLabel,
       routingRule: modeDefinition.routingRule,
       retrievalResults,
+      guardrails,
     }),
     citations,
     retrievalResults,
@@ -47,6 +54,7 @@ function draftLocalConsultantResponse({
     confidence,
     requiresCitation: true,
     safetyLevel,
+    guardrails,
     followUpQuestions: followUpQuestionsByMode[mode],
     contractVersion: chatContractVersion,
     provider: "local",
@@ -57,6 +65,9 @@ function draftLocalConsultantResponse({
       citationCount: citations.length,
       confidence,
       safetyLevel,
+      guardrailStatus: guardrails.status,
+      riskFlags: guardrails.riskFlags,
+      requiresHumanReview: guardrails.requiresHumanReview,
       retrieval: traceFromRetrieval(retrievalResults),
     },
   };
@@ -68,6 +79,7 @@ type ComposeGroundedAnswerInput = {
   consultantLabel: string;
   routingRule: string;
   retrievalResults: RetrievalResult[];
+  guardrails: GuardrailResult;
 };
 
 function composeGroundedAnswer({
@@ -76,10 +88,12 @@ function composeGroundedAnswer({
   consultantLabel,
   routingRule,
   retrievalResults,
+  guardrails,
 }: ComposeGroundedAnswerInput): string {
   const evidenceLines = formatEvidenceLines(retrievalResults);
   const responsePlan = responsePlanByMode[mode];
   const followUps = followUpQuestionsByMode[mode].map((question) => `- ${question}`).join("\n");
+  const guardrailLines = formatGuardrailLines(guardrails);
 
   return [
     `I will handle this as the ${consultantLabel} consultant path.`,
@@ -97,11 +111,28 @@ function composeGroundedAnswer({
     "Production checks",
     responsePlan.productionChecks.map((check) => `- ${check}`).join("\n"),
     "",
+    "Guardrails",
+    guardrailLines,
+    "",
     "Follow-up questions",
     followUps,
     "",
     `Original request: "${message}"`,
   ].join("\n");
+}
+
+function formatGuardrailLines(guardrails: GuardrailResult): string {
+  if (guardrails.status === "pass") {
+    return "- No deterministic risk flags were detected.";
+  }
+
+  const riskSummary = `- Status: ${guardrails.status}. Human review required: ${
+    guardrails.requiresHumanReview ? "yes" : "no"
+  }.`;
+  const flags = `- Risk flags: ${guardrails.riskFlags.join(", ")}.`;
+  const guidance = guardrails.guidance.map((item) => `- ${item}`).join("\n");
+
+  return [riskSummary, flags, guidance].join("\n");
 }
 
 function formatEvidenceLines(results: RetrievalResult[]): string {

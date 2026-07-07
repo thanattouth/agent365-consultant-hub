@@ -37,6 +37,12 @@ npm run eval:benchmark
 
 The benchmark runner uses `http://127.0.0.1:3000` by default. Override with `AGENT365_EVAL_BASE_URL` when targeting another environment.
 
+Run deterministic red-team guardrail checks:
+
+```bash
+npm run eval:red-team
+```
+
 ## Project Charter
 
 Read `SKILL.md` before meaningful project work. It defines the delivery phases, production-grade scorecard, engineering rules, debugging principles, security principles, work logging policy, and Conventional Commit policy.

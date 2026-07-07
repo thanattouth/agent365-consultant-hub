@@ -30,6 +30,10 @@ export const azureOpenAiChatProvider: ChatAnswerProvider = {
         "Azure OpenAI provider is configured for routing, but live model execution is not implemented in this scaffold yet.\n\n" +
         fallbackResponse.content,
       provider: "azure-openai",
+      trace: {
+        ...fallbackResponse.trace,
+        provider: "azure-openai",
+      },
     };
   },
 };

@@ -6,6 +6,23 @@ export type ConsultantMode = (typeof consultantModeIds)[number];
 
 export type SafetyLevel = "standard" | "sensitive" | "high";
 
+export type GuardrailStatus = "pass" | "review" | "block";
+
+export type RiskFlag =
+  | "prompt_injection"
+  | "secret_request"
+  | "permission_bypass"
+  | "destructive_admin_action"
+  | "licensing_certainty"
+  | "production_risk";
+
+export type GuardrailResult = {
+  status: GuardrailStatus;
+  riskFlags: RiskFlag[];
+  requiresHumanReview: boolean;
+  guidance: string[];
+};
+
 export type Citation = {
   title: string;
   source: string;
@@ -21,6 +38,9 @@ export type ChatTrace = {
   citationCount: number;
   confidence: number;
   safetyLevel: SafetyLevel;
+  guardrailStatus: GuardrailStatus;
+  riskFlags: RiskFlag[];
+  requiresHumanReview: boolean;
   retrieval: Array<{
     id: string;
     title: string;
@@ -44,6 +64,9 @@ export type ChatMessage = {
   confidence?: number;
   requiresCitation?: boolean;
   safetyLevel?: SafetyLevel;
+  guardrailStatus?: GuardrailStatus;
+  riskFlags?: RiskFlag[];
+  requiresHumanReview?: boolean;
   followUpQuestions?: string[];
   contractVersion?: string;
   provider?: string;

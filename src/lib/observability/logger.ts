@@ -9,6 +9,9 @@ type ChatLogEvent = {
   citationCount?: number;
   confidence?: number;
   safetyLevel?: string;
+  guardrailStatus?: string;
+  riskFlags?: string[];
+  requiresHumanReview?: boolean;
   errorCategory?: string;
 };
 

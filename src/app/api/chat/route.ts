@@ -50,6 +50,9 @@ export async function POST(request: Request) {
       citationCount: trace.citationCount,
       confidence: response.confidence,
       safetyLevel: response.safetyLevel,
+      guardrailStatus: response.guardrails.status,
+      riskFlags: response.guardrails.riskFlags,
+      requiresHumanReview: response.guardrails.requiresHumanReview,
     });
 
     return NextResponse.json({
@@ -64,6 +67,9 @@ export async function POST(request: Request) {
         confidence: response.confidence,
         requiresCitation: response.requiresCitation,
         safetyLevel: response.safetyLevel,
+        guardrailStatus: response.guardrails.status,
+        riskFlags: response.guardrails.riskFlags,
+        requiresHumanReview: response.guardrails.requiresHumanReview,
         followUpQuestions: response.followUpQuestions,
         contractVersion: response.contractVersion,
         provider: response.provider,

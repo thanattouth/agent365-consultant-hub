@@ -88,6 +88,18 @@ for (const benchmarkCase of benchmarkCases) {
       failures.push("Expected safetyLevel to be standard, sensitive, or high.");
     }
 
+    if (!["pass", "review", "block"].includes(message.guardrailStatus)) {
+      failures.push("Expected guardrailStatus to be pass, review, or block.");
+    }
+
+    if (!Array.isArray(message.riskFlags)) {
+      failures.push("Expected riskFlags array.");
+    }
+
+    if (typeof message.requiresHumanReview !== "boolean") {
+      failures.push("Expected requiresHumanReview boolean.");
+    }
+
     if (!Array.isArray(message.citations) || message.citations.length === 0) {
       failures.push("Expected at least one citation.");
     }

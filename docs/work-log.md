@@ -4,6 +4,31 @@
 
 ### Changed
 
+- Added deterministic input safety classification.
+- Added guardrail status, risk flags, and human-review metadata to chat responses and traces.
+- Added red-team seed prompts and a red-team evaluation runner.
+- Added benchmark checks for guardrail metadata.
+- Documented safety guardrails and production escalation path.
+
+### Why
+
+Before live LLM integration, the chatbot needs a safety contract for prompt injection, secret requests, permission bypass, destructive admin actions, licensing certainty, and production-risk prompts.
+
+### Verified
+
+- `npm run lint` passed.
+- `npm run typecheck` passed.
+- `npm run build` passed.
+- `npm run eval:benchmark` passed 4/4 benchmark cases.
+- `npm run eval:red-team` passed 5/5 red-team cases.
+
+### Risks And Follow-Up
+
+- Guardrails currently attach metadata and guidance but do not hard-stop blocked prompts.
+- Azure AI Content Safety and human escalation should be added before production rollout.
+
+### Changed
+
 - Added chat trace metadata to assistant responses.
 - Added retrieval trace metadata without full source content.
 - Added structured server logging for completed and failed chat requests.
