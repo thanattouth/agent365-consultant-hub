@@ -28,21 +28,19 @@ export function draftConsultantResponse({
 }: DraftConsultantResponseInput): DraftConsultantResponse {
   const normalizedMessage = message.trim();
   const modeDefinition = consultantModeById[mode];
-  const modeGuidance = responseGuidanceByMode[mode];
   const retrievalResults = retrieveLocalKnowledge({
     query: normalizedMessage,
     mode,
   });
-  const retrievedContext = formatRetrievedContext(retrievalResults);
 
   return {
-    content:
-      `I will handle this as the ${modeDefinition.consultantLabel} consultant path. ` +
-      `${modeDefinition.routingRule} ` +
-      `${modeGuidance} ` +
-      `${retrievedContext} ` +
-      `For production-grade work, I would first clarify scope, identify the Microsoft data sources involved, define safety and permission boundaries, then design the smallest verifiable implementation slice. ` +
-      `Your request was: "${normalizedMessage}". The next concrete step is to turn this into an acceptance-tested task before connecting Azure services.`,
+    content: composeGroundedAnswer({
+      message: normalizedMessage,
+      mode,
+      consultantLabel: modeDefinition.consultantLabel,
+      routingRule: modeDefinition.routingRule,
+      retrievalResults,
+    }),
     citations: citationsFromRetrieval(retrievalResults),
     retrievalResults,
     mode,
@@ -54,28 +52,127 @@ export function draftConsultantResponse({
   };
 }
 
-const responseGuidanceByMode: Record<ConsultantMode, string> = {
-  architect:
-    "The answer should recommend a small verifiable architecture slice, include Azure AI Search or an equivalent retrieval layer when RAG is involved, require citations for factual claims, and surface security plus evaluation follow-up.",
-  admin:
-    "The answer should ask for tenant and pilot scope when needed, describe admin setup steps, mention permissions and rollout checks, and include rollback or support considerations.",
-  security:
-    "The answer should mention Entra ID and least privilege, require permission trimming, address prompt injection and data leakage, and include audit, retention, and escalation considerations.",
-  licensing:
-    "The answer should separate assumptions from facts, ask for license validation details, avoid definitive commercial claims without sources, and recommend checking current Microsoft licensing documentation.",
+type ComposeGroundedAnswerInput = {
+  message: string;
+  mode: ConsultantMode;
+  consultantLabel: string;
+  routingRule: string;
+  retrievalResults: RetrievalResult[];
 };
 
-function formatRetrievedContext(results: RetrievalResult[]): string {
+function composeGroundedAnswer({
+  message,
+  mode,
+  consultantLabel,
+  routingRule,
+  retrievalResults,
+}: ComposeGroundedAnswerInput): string {
+  const evidenceLines = formatEvidenceLines(retrievalResults);
+  const responsePlan = responsePlanByMode[mode];
+  const followUps = followUpQuestionsByMode[mode].map((question) => `- ${question}`).join("\n");
+
+  return [
+    `I will handle this as the ${consultantLabel} consultant path.`,
+    routingRule,
+    "",
+    "Grounded answer",
+    responsePlan.summary,
+    "",
+    "Recommended next steps",
+    responsePlan.steps.map((step, index) => `${index + 1}. ${step}`).join("\n"),
+    "",
+    "Evidence used",
+    evidenceLines,
+    "",
+    "Production checks",
+    responsePlan.productionChecks.map((check) => `- ${check}`).join("\n"),
+    "",
+    "Follow-up questions",
+    followUps,
+    "",
+    `Original request: "${message}"`,
+  ].join("\n");
+}
+
+function formatEvidenceLines(results: RetrievalResult[]): string {
   if (results.length === 0) {
-    return "No local knowledge source matched strongly yet, so this response should be treated as planning guidance until retrieval is expanded.";
+    return "- No local knowledge source matched strongly yet. Treat this as planning guidance until retrieval coverage is expanded.";
   }
 
-  const sourceSummary = results
-    .map(({ source }) => `${source.title} (${source.product})`)
-    .join("; ");
-
-  return `Local retrieval matched ${results.length} knowledge source(s): ${sourceSummary}.`;
+  return results
+    .map(({ source }) => `- ${source.title}: ${source.content}`)
+    .join("\n");
 }
+
+const responsePlanByMode: Record<
+  ConsultantMode,
+  {
+    summary: string;
+    steps: string[];
+    productionChecks: string[];
+  }
+> = {
+  architect: {
+    summary:
+      "Start with a small verifiable architecture slice that uses Azure AI Search for RAG grounding, keeps Microsoft Foundry or Azure OpenAI behind a clear API boundary, and requires citations for factual claims. This should surface security plus evaluation follow-up before any production rollout.",
+    steps: [
+      "Define the first Microsoft workload, allowed knowledge sources, and citation rules.",
+      "Create an ingestion path into Azure AI Search or keep the current local retrieval adapter until cloud resources are ready.",
+      "Route chat requests through the API contract so mode, confidence, safety level, and citations are observable.",
+      "Add benchmark cases for architecture quality, groundedness, latency, and failure behavior.",
+    ],
+    productionChecks: [
+      "Confirm source ownership and freshness.",
+      "Measure groundedness before connecting more tools.",
+      "Keep rollback and human escalation paths visible.",
+    ],
+  },
+  admin: {
+    summary:
+      "Treat this as an operational rollout task: capture tenant and pilot scope, define admin setup steps, validate permissions and rollout checks, then document rollback or support considerations before broad deployment.",
+    steps: [
+      "Identify pilot users, tenant constraints, and the target channel such as Microsoft Teams.",
+      "List required admin permissions and app distribution steps.",
+      "Define support ownership, success metrics, and rollback criteria.",
+      "Run a pilot checklist before expanding the audience.",
+    ],
+    productionChecks: [
+      "Confirm admin roles are least privilege.",
+      "Record rollout approvals and operational owners.",
+      "Validate monitoring and user feedback capture.",
+    ],
+  },
+  security: {
+    summary:
+      "Handle this as a high-risk production control path: use Entra ID and least privilege, require permission trimming for tenant-private data, address prompt injection and data leakage, and include audit, retention, and escalation decisions.",
+    steps: [
+      "Classify the data sources and separate public, internal, and confidential knowledge.",
+      "Enforce user identity and permission trimming before retrieved content reaches the answer path.",
+      "Add prompt-injection, data leakage, and unsafe-content tests to the benchmark set.",
+      "Define audit logs, retention windows, and escalation rules for sensitive answers.",
+    ],
+    productionChecks: [
+      "Block retrieval that bypasses source permissions.",
+      "Redact secrets and private content in telemetry.",
+      "Review high-risk responses before production rollout.",
+    ],
+  },
+  licensing: {
+    summary:
+      "Treat licensing answers as assumption-driven until validated: separate assumptions from facts, ask for license validation details, avoid definitive commercial claims without sources, and check current Microsoft licensing documentation before decisions.",
+    steps: [
+      "Capture the current SKU, user group, region, and workload assumptions.",
+      "Map required capabilities to entitlement checks.",
+      "Flag any commercial claim that needs a current Microsoft source.",
+      "Produce a decision note with assumptions, validation questions, and unresolved risks.",
+    ],
+    productionChecks: [
+      "Require current source validation for SKU claims.",
+      "Escalate ambiguous commercial decisions.",
+      "Keep customer-specific licensing context out of logs unless redacted.",
+    ],
+  },
+};
 
 const confidenceByMode: Record<ConsultantMode, number> = {
   architect: 0.72,

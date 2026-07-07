@@ -4,6 +4,30 @@
 
 ### Changed
 
+- Replaced the generic consultant response template with a grounded structured answer composer.
+- Added mode-specific answer plans for Architect, Admin, Security, and Licensing paths.
+- Rendered multiline assistant responses cleanly in the chat UI.
+- Verified a sample Architect request returns recommended steps, evidence used, production checks, follow-up questions, and retrieval-backed citations.
+
+### Why
+
+The product goal for today is to have a bot that can answer usefully, not only echo routing metadata. The local answer composer gives the chatbot an end-to-end answer path while keeping the system deterministic, debuggable, and ready for a future Azure OpenAI provider.
+
+### Verified
+
+- `npm run lint` passed.
+- `npm run typecheck` passed.
+- `npm run build` passed.
+- `npm run eval:benchmark` passed 4/4 benchmark cases.
+- Local API sample for an Architect RAG question returned a structured grounded answer with citations from local retrieval.
+
+### Risks And Follow-Up
+
+- Answers are deterministic and template-composed; this is useful for foundation testing but not a substitute for Azure OpenAI reasoning.
+- Next step should add a provider abstraction so the system can choose local deterministic answers or Azure OpenAI when configured.
+
+### Changed
+
 - Added a local retrieval schema, seeded Microsoft knowledge sources, deterministic retriever, and citation mapper.
 - Connected consultant response drafting to local retrieval so API citations come from retrieved knowledge sources.
 - Added benchmark assertions for expected citation titles.

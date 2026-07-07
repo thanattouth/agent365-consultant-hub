@@ -403,6 +403,7 @@ button {
 
 .message-bubble p {
   margin: 0;
+  white-space: pre-wrap;
 }
 
 .citation-list {
