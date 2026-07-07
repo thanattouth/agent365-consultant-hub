@@ -4,6 +4,31 @@
 
 ### Changed
 
+- Added chat trace metadata to assistant responses.
+- Added retrieval trace metadata without full source content.
+- Added structured server logging for completed and failed chat requests.
+- Updated benchmark checks to validate trace metadata.
+- Documented observability and debugging expectations.
+
+### Why
+
+Production-grade chatbot behavior must be debuggable. Trace metadata lets us understand provider routing, retrieval behavior, citation coverage, latency, confidence, and safety level without logging sensitive prompt or source content.
+
+### Verified
+
+- `npm run lint` passed.
+- `npm run typecheck` passed.
+- `npm run build` passed.
+- `npm run eval:benchmark` passed 4/4 benchmark cases with trace assertions.
+- Local API sample returned trace metadata with provider, mode, latency, retrieval counts, citation count, confidence, safety level, and retrieval source metadata.
+
+### Risks And Follow-Up
+
+- Logs currently write to stdout; production should export them to Application Insights or Azure Monitor.
+- Trace metadata is visible in the API response and may later need role-based visibility in the UI.
+
+### Changed
+
 - Added a chat provider abstraction with a default `local` provider.
 - Moved deterministic grounded answer composition into the local provider.
 - Added an Azure OpenAI provider scaffold with configuration validation.

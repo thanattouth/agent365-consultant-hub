@@ -3,6 +3,7 @@ import { consultantModeById } from "@/lib/chat/modes";
 import type { ConsultantMode, SafetyLevel } from "@/lib/chat/types";
 import { citationsFromRetrieval } from "@/lib/retrieval/citations";
 import { retrieveLocalKnowledge } from "@/lib/retrieval/retriever";
+import { traceFromRetrieval } from "@/lib/retrieval/trace";
 import type { RetrievalResult } from "@/lib/retrieval/types";
 
 import type {
@@ -28,6 +29,9 @@ function draftLocalConsultantResponse({
     query: normalizedMessage,
     mode,
   });
+  const citations = citationsFromRetrieval(retrievalResults);
+  const confidence = confidenceByMode[mode];
+  const safetyLevel = safetyLevelByMode[mode];
 
   return {
     content: composeGroundedAnswer({
@@ -37,15 +41,24 @@ function draftLocalConsultantResponse({
       routingRule: modeDefinition.routingRule,
       retrievalResults,
     }),
-    citations: citationsFromRetrieval(retrievalResults),
+    citations,
     retrievalResults,
     mode,
-    confidence: confidenceByMode[mode],
+    confidence,
     requiresCitation: true,
-    safetyLevel: safetyLevelByMode[mode],
+    safetyLevel,
     followUpQuestions: followUpQuestionsByMode[mode],
     contractVersion: chatContractVersion,
     provider: "local",
+    trace: {
+      provider: "local",
+      mode,
+      retrievalResultCount: retrievalResults.length,
+      citationCount: citations.length,
+      confidence,
+      safetyLevel,
+      retrieval: traceFromRetrieval(retrievalResults),
+    },
   };
 }
 

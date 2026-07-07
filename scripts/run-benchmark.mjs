@@ -40,6 +40,38 @@ for (const benchmarkCase of benchmarkCases) {
       failures.push(`Expected local provider, received ${message.provider}.`);
     }
 
+    if (!message.trace) {
+      failures.push("Expected trace metadata.");
+    } else {
+      if (message.trace.requestId !== payload.requestId) {
+        failures.push("Expected trace.requestId to match response requestId.");
+      }
+
+      if (typeof message.trace.latencyMs !== "number" || message.trace.latencyMs < 0) {
+        failures.push("Expected trace.latencyMs to be a non-negative number.");
+      }
+
+      if (message.trace.provider !== "local") {
+        failures.push(`Expected trace.provider local, received ${message.trace.provider}.`);
+      }
+
+      if (message.trace.mode !== benchmarkCase.mode) {
+        failures.push(`Expected trace.mode ${benchmarkCase.mode}, received ${message.trace.mode}.`);
+      }
+
+      if (message.trace.citationCount !== message.citations.length) {
+        failures.push("Expected trace.citationCount to match citations length.");
+      }
+
+      if (message.trace.retrievalResultCount < 1) {
+        failures.push("Expected at least one retrieval result in trace.");
+      }
+
+      if (!Array.isArray(message.trace.retrieval) || message.trace.retrieval.length < 1) {
+        failures.push("Expected retrieval trace items.");
+      }
+    }
+
     if (message.mode !== benchmarkCase.mode) {
       failures.push(`Expected mode ${benchmarkCase.mode}, received ${message.mode}.`);
     }

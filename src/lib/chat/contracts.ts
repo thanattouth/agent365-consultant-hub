@@ -15,6 +15,29 @@ export const citationSchema = z.object({
   url: z.string().url().optional(),
 });
 
+export const chatTraceSchema = z.object({
+  requestId: z.string().min(1).optional(),
+  provider: z.enum(["local", "azure-openai"]),
+  mode: z.enum(consultantModeIds),
+  latencyMs: z.number().nonnegative().optional(),
+  retrievalResultCount: z.number().int().nonnegative(),
+  citationCount: z.number().int().nonnegative(),
+  confidence: z.number().min(0).max(1),
+  safetyLevel: z.enum(["standard", "sensitive", "high"]),
+  retrieval: z.array(
+    z.object({
+      id: z.string().min(1),
+      title: z.string().min(1),
+      source: z.string().min(1),
+      product: z.string().min(1),
+      scenario: z.string().min(1),
+      sensitivity: z.enum(["public", "internal", "confidential"]),
+      score: z.number(),
+      matchedKeywords: z.array(z.string()),
+    }),
+  ),
+});
+
 export const assistantMessageSchema = z.object({
   id: z.string().min(1),
   role: z.literal("assistant"),
@@ -29,6 +52,7 @@ export const assistantMessageSchema = z.object({
   followUpQuestions: z.array(z.string().min(1)),
   contractVersion: z.literal(chatContractVersion),
   provider: z.enum(["local", "azure-openai"]),
+  trace: chatTraceSchema,
 });
 
 export const chatResponseSchema = z.object({

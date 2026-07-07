@@ -12,6 +12,27 @@ export type Citation = {
   url?: string;
 };
 
+export type ChatTrace = {
+  requestId?: string;
+  provider: string;
+  mode: ConsultantMode;
+  latencyMs?: number;
+  retrievalResultCount: number;
+  citationCount: number;
+  confidence: number;
+  safetyLevel: SafetyLevel;
+  retrieval: Array<{
+    id: string;
+    title: string;
+    source: string;
+    product: string;
+    scenario: string;
+    sensitivity: string;
+    score: number;
+    matchedKeywords: string[];
+  }>;
+};
+
 export type ChatMessage = {
   id: string;
   role: ChatRole;
@@ -26,6 +47,7 @@ export type ChatMessage = {
   followUpQuestions?: string[];
   contractVersion?: string;
   provider?: string;
+  trace?: ChatTrace;
 };
 
 export type ConversationSummary = {

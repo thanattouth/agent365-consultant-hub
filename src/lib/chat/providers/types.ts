@@ -1,4 +1,4 @@
-import type { Citation, ConsultantMode, SafetyLevel } from "@/lib/chat/types";
+import type { ChatTrace, Citation, ConsultantMode, SafetyLevel } from "@/lib/chat/types";
 import type { RetrievalResult } from "@/lib/retrieval/types";
 
 export type ChatProviderId = "local" | "azure-openai";
@@ -19,6 +19,7 @@ export type DraftConsultantResponse = {
   followUpQuestions: string[];
   contractVersion: string;
   provider: ChatProviderId;
+  trace: ChatTrace;
 };
 
 export type ChatAnswerProvider = {
