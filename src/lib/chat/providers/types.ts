@@ -1,5 +1,6 @@
 import type {
   ChatTrace,
+  ChatTurn,
   Citation,
   ConsultantMode,
   GuardrailResult,
@@ -12,6 +13,7 @@ export type ChatProviderId = "local" | "azure-openai";
 export type DraftConsultantResponseInput = {
   message: string;
   mode: ConsultantMode;
+  messages?: ChatTurn[];
 };
 
 export type DraftConsultantResponse = {

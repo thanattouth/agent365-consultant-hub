@@ -1,13 +1,12 @@
 "use client";
 
 import {
-  BadgeDollarSign,
   BotMessageSquare,
   Cloud,
   History,
+  LoaderCircle,
   Menu,
   Mic,
-  Network,
   Paperclip,
   Plus,
   Send,
@@ -16,15 +15,13 @@ import {
   SlidersHorizontal,
   Sparkles,
   Trash2,
-  Wrench,
   Workflow,
 } from "lucide-react";
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 
 import { MessageBubble } from "@/components/chat/message-bubble";
-import { consultantModes } from "@/lib/chat/modes";
 import { conversations, initialMessages } from "@/lib/chat/mock-data";
-import type { ChatMessage, ConsultantMode, ConversationSummary } from "@/lib/chat/types";
+import type { ChatMessage, ConversationSummary } from "@/lib/chat/types";
 
 const iconByConversation: Record<ConversationSummary["icon"], typeof BotMessageSquare> = {
   chat: BotMessageSquare,
@@ -33,23 +30,20 @@ const iconByConversation: Record<ConversationSummary["icon"], typeof BotMessageS
   workflow: Workflow,
 };
 
-const iconByMode: Record<ConsultantMode, typeof Network> = {
-  architect: Network,
-  admin: Wrench,
-  security: ShieldCheck,
-  licensing: BadgeDollarSign,
-};
-
 export function ChatShell() {
   const [messages, setMessages] = useState<ChatMessage[]>(initialMessages);
   const [input, setInput] = useState("");
-  const [mode, setMode] = useState<ConsultantMode>("architect");
   const [isSending, setIsSending] = useState(false);
+  const conversationEndRef = useRef<HTMLDivElement>(null);
 
-  const activeMode = useMemo(
-    () => consultantModes.find((item) => item.id === mode) ?? consultantModes[0],
-    [mode],
-  );
+  useEffect(() => {
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    conversationEndRef.current?.scrollIntoView({
+      block: "end",
+      behavior: prefersReducedMotion ? "auto" : "smooth",
+    });
+  }, [messages, isSending]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -77,7 +71,15 @@ export function ChatShell() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ message: trimmed, mode }),
+        body: JSON.stringify({
+          message: trimmed,
+          messages: [...messages, userMessage]
+            .filter((message) => message.role === "user" || message.role === "assistant")
+            .map((message) => ({
+              role: message.role,
+              content: message.content,
+            })),
+        }),
       });
 
       if (!response.ok) {
@@ -94,7 +96,7 @@ export function ChatShell() {
           role: "assistant",
           author: "Agent365",
           content:
-            "I could not complete that request. Please try again, or narrow the scope so I can continue safely.",
+            "I could not reach the AI provider. Please check the Azure OpenAI configuration and try again.",
           createdAt: new Date().toISOString(),
         },
       ]);
@@ -174,43 +176,42 @@ export function ChatShell() {
           </div>
         </header>
 
-        <section className="mode-switcher-wrap" aria-label="Consultant mode selection">
-          <div className="mode-switcher raised" role="list">
-            {consultantModes.map((item) => {
-              const isActive = item.id === mode;
-              const Icon = iconByMode[item.id];
-              return (
-                <button
-                  aria-pressed={isActive}
-                  className={`mode-switch-button ${isActive ? "active sunken-sm" : ""}`}
-                  key={item.id}
-                  onClick={() => setMode(item.id)}
-                  title={`${item.label}: ${item.bestFor}`}
-                  type="button"
-                >
-                  <Icon size={19} aria-hidden="true" />
-                  <span>{item.label}</span>
-                </button>
-              );
-            })}
-          </div>
-        </section>
-
         <section className="conversation" aria-label="Chat messages">
-          <div className="conversation-inner">
-            <div className="session-summary raised">
-              <div>
-                <p className="eyebrow">Current focus</p>
-                <h3>{activeMode.label} mode</h3>
+          <div className="conversation-inner" aria-busy={isSending} aria-live="polite">
+            {messages.length === 0 ? (
+              <div className="session-summary raised">
+                <div>
+                  <p className="eyebrow">Ready</p>
+                  <h3>Start a conversation</h3>
+                </div>
+                <div>
+                  <p>Ask Agent365 anything. The chat now sends conversation history to the configured AI provider.</p>
+                  <p className="session-outcome">Connected through the chat provider boundary.</p>
+                </div>
               </div>
-              <div>
-                <p>{activeMode.description}</p>
-                <p className="session-outcome">{activeMode.outcome}</p>
-              </div>
-            </div>
+            ) : null}
             {messages.map((message) => (
               <MessageBubble key={message.id} message={message} />
             ))}
+            {isSending ? (
+              <div className="message-row message-row-pending" role="status" aria-label="Agent365 is preparing a response">
+                <div className="message-meta">
+                  <span className="avatar avatar-agent">
+                    <Sparkles size={14} aria-hidden="true" />
+                  </span>
+                  <span>Agent365</span>
+                </div>
+                <div className="message-bubble message-bubble-pending raised">
+                  <span className="typing-dots" aria-hidden="true">
+                    <span />
+                    <span />
+                    <span />
+                  </span>
+                  <span className="typing-label">Thinking</span>
+                </div>
+              </div>
+            ) : null}
+            <div ref={conversationEndRef} />
           </div>
         </section>
 
@@ -233,8 +234,17 @@ export function ChatShell() {
                 </button>
               </div>
             </div>
-            <button className="send-button raised" disabled={isSending} type="submit" aria-label="Send message">
-              <Send size={20} aria-hidden="true" />
+            <button
+              className="send-button raised"
+              disabled={isSending}
+              type="submit"
+              aria-label={isSending ? "Sending message" : "Send message"}
+            >
+              {isSending ? (
+                <LoaderCircle className="send-spinner" size={20} aria-hidden="true" />
+              ) : (
+                <Send size={20} aria-hidden="true" />
+              )}
             </button>
           </form>
         </footer>

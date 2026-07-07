@@ -15,11 +15,11 @@ export function getChatAnswerProvider(): ChatAnswerProvider {
 export function getConfiguredProviderId(): ChatProviderId {
   const configuredProvider = process.env.AGENT365_CHAT_PROVIDER;
 
-  if (configuredProvider === "azure-openai") {
+  if (configuredProvider === "local" || configuredProvider === "azure-openai") {
     return configuredProvider;
   }
 
-  return "local";
+  return "azure-openai";
 }
 
 export type { ChatAnswerProvider, ChatProviderId } from "./types";

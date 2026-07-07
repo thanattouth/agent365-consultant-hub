@@ -6,7 +6,16 @@ export const chatContractVersion = "chat.response.v1";
 
 export const chatRequestSchema = z.object({
   message: z.string().trim().min(1).max(4000),
-  mode: z.enum(consultantModeIds),
+  mode: z.enum(consultantModeIds).optional().default("architect"),
+  messages: z
+    .array(
+      z.object({
+        role: z.enum(["user", "assistant"]),
+        content: z.string().trim().min(1).max(8000),
+      }),
+    )
+    .max(20)
+    .optional(),
 });
 
 export const citationSchema = z.object({

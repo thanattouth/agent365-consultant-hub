@@ -23,6 +23,11 @@ export type GuardrailResult = {
   guidance: string[];
 };
 
+export type ChatTurn = {
+  role: Exclude<ChatRole, "system">;
+  content: string;
+};
+
 export type Citation = {
   title: string;
   source: string;

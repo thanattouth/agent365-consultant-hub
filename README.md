@@ -31,7 +31,7 @@ npm run build
 Run the benchmark evaluation against a running local server:
 
 ```bash
-npm run dev
+AGENT365_CHAT_PROVIDER=local npm run dev
 npm run eval:benchmark
 ```
 
@@ -49,4 +49,4 @@ Read `SKILL.md` before meaningful project work. It defines the delivery phases, 
 
 ## Chat Provider
 
-The default answer provider is `local`, which returns deterministic grounded answers from the local retrieval adapter. See `docs/chat-providers.md` for the Azure OpenAI provider scaffold.
+The default answer provider is `azure-openai`. Configure `AZURE_OPENAI_ENDPOINT`, `AZURE_OPENAI_DEPLOYMENT`, and `AZURE_OPENAI_API_KEY` for normal chat. The `local` provider is retained for deterministic development/evaluation only.

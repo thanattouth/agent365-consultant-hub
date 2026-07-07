@@ -31,7 +31,11 @@ export async function POST(request: Request) {
       );
     }
 
-    const response = await draftConsultantResponse(parsed.data);
+    const response = await draftConsultantResponse({
+      message: parsed.data.message,
+      mode: parsed.data.mode,
+      messages: parsed.data.messages,
+    });
     const latencyMs = Date.now() - startedAt;
     const trace = {
       ...response.trace,

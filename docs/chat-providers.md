@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Agent365 can now route answer generation through a provider abstraction. This keeps the current deterministic local answer path working while preparing the system for Azure OpenAI.
+Agent365 routes answer generation through a provider abstraction. The normal runtime path is Azure OpenAI; the deterministic local path is retained for development and evaluation.
 
 ## Providers
 
@@ -17,13 +17,17 @@ The local provider composes deterministic grounded answers from:
 - mode-specific answer plans
 - response contract metadata
 
-Use this provider for development, benchmark stability, and debugging.
+Use this provider only for development, benchmark stability, and debugging:
+
+```bash
+AGENT365_CHAT_PROVIDER=local npm run dev
+```
 
 ### Azure OpenAI
 
 Provider id: `azure-openai`
 
-The Azure provider is config-guarded and intentionally scaffolded. It validates required environment variables and returns a clear service error when selected without configuration. Live model execution should be implemented behind this provider boundary in the next integration phase.
+The Azure provider calls Azure OpenAI chat completions over REST. It validates required environment variables and returns a clear service error when selected without configuration.
 
 Required configuration:
 
@@ -31,9 +35,13 @@ Required configuration:
 AGENT365_CHAT_PROVIDER=azure-openai
 AZURE_OPENAI_ENDPOINT=
 AZURE_OPENAI_DEPLOYMENT=
+AZURE_OPENAI_API_KEY=
+AZURE_OPENAI_API_VERSION=2024-10-21
 ```
 
-`AZURE_OPENAI_API_KEY` is available for local development, but production should prefer managed identity where possible.
+`AZURE_OPENAI_API_KEY` is available for local development. Production should move toward managed identity or an approved secret flow where possible.
+
+Newer Azure OpenAI chat deployments may reject `max_tokens`; the provider uses `max_completion_tokens` for compatibility with those models.
 
 ## Contract
 
@@ -50,6 +58,6 @@ Every assistant response includes:
 
 ## Next Steps
 
-- Add the Azure SDK or REST adapter inside `src/lib/chat/providers/azure-openai.ts`.
-- Keep retrieval and citations outside the provider where possible so grounding remains observable.
-- Add provider-specific benchmark cases before enabling Azure responses by default.
+- Add managed identity support.
+- Add provider-specific live integration tests in a controlled environment.
+- Re-introduce retrieval grounding around Azure responses when moving back toward consultant-grade RAG.

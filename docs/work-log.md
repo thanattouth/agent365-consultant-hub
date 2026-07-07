@@ -4,6 +4,78 @@
 
 ### Changed
 
+- Added production-style chat interaction animation.
+- Added an assistant typing indicator while the chat provider request is in flight.
+- Added send-button loading feedback and automatic scroll-to-latest-message behavior.
+- Added motion-reduction handling for users who prefer reduced motion.
+
+### Why
+
+Normal AI chat needs clear interaction feedback so users understand that a provider request is running, especially when live Azure OpenAI latency varies.
+
+### Verified
+
+- `npm run lint` passed.
+- `npm run typecheck` passed.
+- `npm run build` passed.
+- Browser page load check confirmed the chat shell, composer input, and send button render on the local app.
+
+### Risks And Follow-Up
+
+- Browser automation timed out while attempting a full send-message interaction check; re-run a manual browser pass to visually confirm the transient typing state.
+- Future streaming responses should replace the typing indicator with token-level answer streaming.
+
+### Changed
+
+- Updated the Azure OpenAI REST request to use `max_completion_tokens` for newer chat deployments.
+- Verified the configured Azure OpenAI deployment can return a live assistant response.
+- Verified the app `/api/chat` route returns `provider: azure-openai` with trace metadata after environment configuration.
+
+### Why
+
+The configured deployment rejected the older `max_tokens` parameter. The provider must use the completion-token parameter supported by newer Azure OpenAI chat models before normal chat can work reliably.
+
+### Verified
+
+- Direct Azure OpenAI REST check returned 200 with assistant content.
+- Local `/api/chat` smoke test returned 200 through the app provider path.
+- `npm run lint` passed.
+- `npm run typecheck` passed.
+- `npm run build` passed.
+
+### Risks And Follow-Up
+
+- Current API errors from live provider execution are still surfaced as generic 500 responses; add sanitized 502 provider errors for easier production debugging.
+- HMR WebSocket disconnects can occur when the dev server restarts or recompiles; refresh the browser if the chat API is already healthy.
+
+### Changed
+
+- Switched normal chat runtime to Azure OpenAI by default.
+- Implemented Azure OpenAI chat completions over REST.
+- Added conversation history support in the chat API and UI request payload.
+- Removed mock initial chat messages and mock history entries from the active UI.
+- Removed consultant mode selection from the normal chat UI.
+- Kept the deterministic local provider only as an explicit development/evaluation path.
+
+### Why
+
+The next product goal is normal AI conversation before returning to advanced consultant behavior. The runtime should now call a real AI provider when configured, while local deterministic behavior remains available only for controlled tests.
+
+### Verified
+
+- `npm run lint` passed.
+- `npm run typecheck` passed.
+- `npm run build` passed.
+- Local API check without Azure OpenAI configuration returned a clear 503 provider configuration error instead of a mock response.
+
+### Risks And Follow-Up
+
+- Azure OpenAI requires environment configuration before chat responses can complete.
+- Current Azure OpenAI auth uses API key; managed identity should be added later.
+- Evaluation scripts require the local provider unless separate live-provider evaluation is added.
+
+### Changed
+
 - Added deterministic input safety classification.
 - Added guardrail status, risk flags, and human-review metadata to chat responses and traces.
 - Added red-team seed prompts and a red-team evaluation runner.
