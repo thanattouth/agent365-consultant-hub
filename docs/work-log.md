@@ -4,6 +4,32 @@
 
 ### Changed
 
+- Added `retrievalProvider` to chat trace metadata so tests and operators can verify whether grounding used local retrieval or Azure AI Search.
+- Added `npm run setup:azure-search-index` to create or update the expected Azure AI Search schema.
+- Updated Azure smoke checks to optionally assert `trace.retrievalProvider` with `AGENT365_EXPECT_RETRIEVAL_PROVIDER`.
+- Documented the setup, seed, and Azure AI Search provenance test workflow.
+
+### Why
+
+Azure AI Search needs a repeatable index schema workflow, and live smoke tests must prove the app used Azure AI Search rather than passing only because local fallback returned the same seeded citation titles.
+
+### Verified
+
+- `npm.cmd run lint` passed.
+- `npm.cmd run typecheck` passed.
+- `npm.cmd run build` passed.
+- `npm.cmd run eval:benchmark` passed 4/4 cases with `trace.retrievalProvider: local`.
+- `npm.cmd run eval:red-team` passed 5/5 cases.
+- `npm.cmd run eval:azure-smoke` passed with `trace.retrievalProvider: azure-ai-search`, 3 citations, and 3 retrieval results.
+- `npm.cmd run setup:azure-search-index` reached Azure AI Search but could not update the existing index because Azure Search does not allow changing the existing `title` field.
+
+### Risks And Follow-Up
+
+- Index setup uses the current non-vector schema; future semantic/vector retrieval will need an index migration plan.
+- Updating existing Azure AI Search indexes can be limited by Azure Search schema rules; incompatible schema changes may require a new index.
+
+### Changed
+
 - Added an opt-in Azure AI Search retrieval adapter using the Search Documents POST REST API.
 - Added `AGENT365_RETRIEVAL_PROVIDER` selection so Azure OpenAI grounding can use either deterministic local retrieval or Azure AI Search.
 - Mapped Azure AI Search documents back into the existing citation and retrieval trace contract.

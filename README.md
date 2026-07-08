@@ -64,6 +64,14 @@ AZURE_AI_SEARCH_API_VERSION=2024-07-01
 
 The first Azure AI Search adapter expects retrievable fields named `id`, `title`, `source`, `url`, `product`, `scenario`, `sensitivity`, `modes`, `keywords`, and `content`.
 
+Create or update the Azure AI Search index schema:
+
+```bash
+npm run setup:azure-search-index
+```
+
+Azure AI Search does not allow some field attributes to be changed after an index exists. If setup reports that an existing field cannot be changed, create a new index name or keep the existing compatible schema.
+
 Seed the starter knowledge documents into the configured Azure AI Search index:
 
 ```bash
@@ -71,6 +79,12 @@ npm run seed:azure-search
 ```
 
 Seeding requires an Azure AI Search admin key. Query keys can search documents but cannot upload them.
+
+Assert that a live smoke test used Azure AI Search, not local fallback:
+
+```bash
+AGENT365_EXPECT_RETRIEVAL_PROVIDER=azure-ai-search npm run eval:azure-smoke
+```
 
 ## Project Charter
 

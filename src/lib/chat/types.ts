@@ -37,6 +37,7 @@ export type Citation = {
 export type ChatTrace = {
   requestId?: string;
   provider: string;
+  retrievalProvider: "local" | "azure-ai-search";
   mode: ConsultantMode;
   latencyMs?: number;
   retrievalResultCount: number;

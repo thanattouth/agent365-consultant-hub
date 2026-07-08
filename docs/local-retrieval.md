@@ -33,6 +33,18 @@ AZURE_AI_SEARCH_API_VERSION=2024-07-01
 
 The Azure adapter uses the Search Documents POST REST API and requests the fields needed to preserve Agent365 citation and trace metadata.
 
+Create or update the expected index schema:
+
+```bash
+npm run setup:azure-search-index
+```
+
+Seed starter knowledge into the configured index:
+
+```bash
+npm run seed:azure-search
+```
+
 ## Knowledge Source Fields
 
 - `title`: user-facing citation title.

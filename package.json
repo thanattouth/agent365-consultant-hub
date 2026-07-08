@@ -9,6 +9,7 @@
     "eval:benchmark": "node scripts/run-benchmark.mjs",
     "eval:red-team": "node scripts/run-red-team.mjs",
     "eval:azure-smoke": "node scripts/run-azure-smoke.mjs",
+    "setup:azure-search-index": "node scripts/setup-azure-search-index.mjs",
     "seed:azure-search": "node scripts/seed-azure-search.mjs",
     "start": "next start",
     "lint": "eslint .",

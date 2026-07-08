@@ -27,6 +27,7 @@ export const citationSchema = z.object({
 export const chatTraceSchema = z.object({
   requestId: z.string().min(1).optional(),
   provider: z.enum(["local", "azure-openai"]),
+  retrievalProvider: z.enum(["local", "azure-ai-search"]),
   mode: z.enum(consultantModeIds),
   latencyMs: z.number().nonnegative().optional(),
   retrievalResultCount: z.number().int().nonnegative(),

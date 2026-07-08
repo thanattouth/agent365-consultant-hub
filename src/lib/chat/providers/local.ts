@@ -60,6 +60,7 @@ function draftLocalConsultantResponse({
     provider: "local",
     trace: {
       provider: "local",
+      retrievalProvider: "local",
       mode,
       retrievalResultCount: retrievalResults.length,
       citationCount: citations.length,

@@ -55,6 +55,12 @@ for (const benchmarkCase of benchmarkCases) {
         failures.push(`Expected trace.provider local, received ${message.trace.provider}.`);
       }
 
+      if (message.trace.retrievalProvider !== "local") {
+        failures.push(
+          `Expected trace.retrievalProvider local, received ${message.trace.retrievalProvider}.`,
+        );
+      }
+
       if (message.trace.mode !== benchmarkCase.mode) {
         failures.push(`Expected trace.mode ${benchmarkCase.mode}, received ${message.trace.mode}.`);
       }

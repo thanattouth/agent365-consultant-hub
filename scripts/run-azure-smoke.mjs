@@ -61,6 +61,14 @@ if (!message) {
       failures.push(`Expected trace.provider azure-openai, received ${message.trace.provider}.`);
     }
 
+    if (process.env.AGENT365_EXPECT_RETRIEVAL_PROVIDER) {
+      if (message.trace.retrievalProvider !== process.env.AGENT365_EXPECT_RETRIEVAL_PROVIDER) {
+        failures.push(
+          `Expected trace.retrievalProvider ${process.env.AGENT365_EXPECT_RETRIEVAL_PROVIDER}, received ${message.trace.retrievalProvider}.`,
+        );
+      }
+    }
+
     if (message.trace.retrievalResultCount < 1) {
       failures.push("Expected at least one retrieval result in trace.");
     }
@@ -105,5 +113,6 @@ if (failures.length > 0) {
 
 console.log(`Agent365 Azure smoke: PASS ${smokeCase.id}`);
 console.log(`  requestId: ${payload.requestId}`);
+console.log(`  retrievalProvider: ${message.trace.retrievalProvider}`);
 console.log(`  citations: ${message.citations.length}`);
 console.log(`  retrievalResults: ${message.trace.retrievalResultCount}`);

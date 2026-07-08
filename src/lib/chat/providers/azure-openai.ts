@@ -2,7 +2,7 @@ import { chatContractVersion } from "@/lib/chat/contracts";
 import type { ConsultantMode, SafetyLevel } from "@/lib/chat/types";
 import { RetrievalConfigurationError } from "@/lib/retrieval/azure-ai-search";
 import { citationsFromRetrieval } from "@/lib/retrieval/citations";
-import { retrieveKnowledge } from "@/lib/retrieval/retriever";
+import { getConfiguredRetrievalProviderId, retrieveKnowledge } from "@/lib/retrieval/retriever";
 import { traceFromRetrieval } from "@/lib/retrieval/trace";
 import type { RetrievalResult } from "@/lib/retrieval/types";
 import { classifyInputSafety } from "@/lib/safety/guardrails";
@@ -56,6 +56,7 @@ export const azureOpenAiChatProvider: ChatAnswerProvider = {
     });
     const retrievalResults = await retrieveGrounding(input);
     const citations = citationsFromRetrieval(retrievalResults);
+    const retrievalProvider = getConfiguredRetrievalProviderId();
     const safetyLevel = getSafetyLevel({
       mode: input.mode,
       hasGuardrailRisk: guardrails.status !== "pass",
@@ -80,6 +81,7 @@ export const azureOpenAiChatProvider: ChatAnswerProvider = {
       provider: "azure-openai",
       trace: {
         provider: "azure-openai",
+        retrievalProvider,
         mode: input.mode,
         retrievalResultCount: retrievalResults.length,
         citationCount: citations.length,
