@@ -1,7 +1,8 @@
 import { chatContractVersion } from "@/lib/chat/contracts";
 import type { ConsultantMode, SafetyLevel } from "@/lib/chat/types";
+import { RetrievalConfigurationError } from "@/lib/retrieval/azure-ai-search";
 import { citationsFromRetrieval } from "@/lib/retrieval/citations";
-import { retrieveLocalKnowledge } from "@/lib/retrieval/retriever";
+import { retrieveKnowledge } from "@/lib/retrieval/retriever";
 import { traceFromRetrieval } from "@/lib/retrieval/trace";
 import type { RetrievalResult } from "@/lib/retrieval/types";
 import { classifyInputSafety } from "@/lib/safety/guardrails";
@@ -53,10 +54,7 @@ export const azureOpenAiChatProvider: ChatAnswerProvider = {
       message: input.message,
       mode: input.mode,
     });
-    const retrievalResults = retrieveLocalKnowledge({
-      query: input.message,
-      mode: input.mode,
-    });
+    const retrievalResults = await retrieveGrounding(input);
     const citations = citationsFromRetrieval(retrievalResults);
     const safetyLevel = getSafetyLevel({
       mode: input.mode,
@@ -95,6 +93,21 @@ export const azureOpenAiChatProvider: ChatAnswerProvider = {
     };
   },
 };
+
+async function retrieveGrounding(input: DraftConsultantResponseInput): Promise<RetrievalResult[]> {
+  try {
+    return await retrieveKnowledge({
+      query: input.message,
+      mode: input.mode,
+    });
+  } catch (error) {
+    if (error instanceof RetrievalConfigurationError) {
+      throw new ChatProviderConfigurationError(error.message);
+    }
+
+    throw new ChatProviderExecutionError("Retrieval provider could not complete grounding.");
+  }
+}
 
 export class ChatProviderConfigurationError extends Error {
   constructor(message: string) {

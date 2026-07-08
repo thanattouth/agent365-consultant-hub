@@ -1,5 +1,28 @@
 import type { RetrievalInput, RetrievalResult } from "./types";
+import { retrieveAzureAiSearchKnowledge } from "./azure-ai-search";
 import { localKnowledgeBase } from "./knowledge-base";
+
+export type RetrievalProviderId = "local" | "azure-ai-search";
+
+export async function retrieveKnowledge(input: RetrievalInput): Promise<RetrievalResult[]> {
+  const providerId = getConfiguredRetrievalProviderId();
+
+  if (providerId === "azure-ai-search") {
+    return retrieveAzureAiSearchKnowledge(input);
+  }
+
+  return retrieveLocalKnowledge(input);
+}
+
+export function getConfiguredRetrievalProviderId(): RetrievalProviderId {
+  const configuredProvider = process.env.AGENT365_RETRIEVAL_PROVIDER;
+
+  if (configuredProvider === "azure-ai-search") {
+    return "azure-ai-search";
+  }
+
+  return "local";
+}
 
 export function retrieveLocalKnowledge({
   query,

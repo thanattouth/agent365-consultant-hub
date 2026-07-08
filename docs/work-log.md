@@ -4,6 +4,37 @@
 
 ### Changed
 
+- Added an opt-in Azure AI Search retrieval adapter using the Search Documents POST REST API.
+- Added `AGENT365_RETRIEVAL_PROVIDER` selection so Azure OpenAI grounding can use either deterministic local retrieval or Azure AI Search.
+- Mapped Azure AI Search documents back into the existing citation and retrieval trace contract.
+- Added Azure AI Search configuration variables to `.env.example` and documented the expected index fields.
+- Added a seed script for uploading starter knowledge documents to the configured Azure AI Search index.
+
+### Why
+
+The chat response contract is already citation-aware. Azure AI Search needs to fit behind the same retrieval boundary so the application can move from seeded local grounding to production RAG without changing the UI, API response shape, or Azure OpenAI prompt path.
+
+### Verified
+
+- `npm.cmd run lint` passed.
+- `npm.cmd run typecheck` passed.
+- `npm.cmd run build` passed.
+- `npm.cmd run eval:benchmark` passed 4/4 cases with local retrieval.
+- `npm.cmd run eval:red-team` passed 5/5 cases with local retrieval.
+- Direct Azure AI Search query connected to the configured index and returned `count=0` before seeding.
+- `npm.cmd run seed:azure-search` uploaded 7 starter knowledge documents after the Azure AI Search admin key was configured.
+- Direct Azure AI Search query returned `count=7` after seeding.
+- `npm.cmd run eval:azure-smoke` passed against the live Azure OpenAI and Azure AI Search path with 3 citations and 3 retrieval results.
+
+### Risks And Follow-Up
+
+- The first Azure AI Search adapter assumes retrievable index fields named `id`, `title`, `source`, `url`, `product`, `scenario`, `sensitivity`, `modes`, `keywords`, and `content`.
+- Live Azure AI Search smoke testing still requires a populated index and valid `AZURE_AI_SEARCH_API_KEY`.
+- Seeding requires an Azure AI Search admin key; query keys can search but cannot upload documents.
+- Tenant-private sources still need permission trimming before production use.
+
+### Changed
+
 - Added an Azure OpenAI smoke evaluation script for the live `/api/chat` path.
 - Added `npm run eval:azure-smoke` to validate Azure provider routing, citation metadata, retrieval trace metadata, follow-up questions, and basic response redaction markers.
 - Wrapped Azure OpenAI network and invalid-JSON failures as provider execution errors so they return sanitized `502` responses instead of unhandled `500` responses.

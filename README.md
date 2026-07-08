@@ -52,6 +52,26 @@ npm run eval:azure-smoke
 
 The Azure smoke runner validates provider routing, citation metadata, retrieval trace metadata, and basic response redaction checks.
 
+Use Azure AI Search for grounding instead of the local retriever:
+
+```bash
+AGENT365_RETRIEVAL_PROVIDER=azure-ai-search
+AZURE_AI_SEARCH_ENDPOINT=
+AZURE_AI_SEARCH_INDEX=
+AZURE_AI_SEARCH_API_KEY=
+AZURE_AI_SEARCH_API_VERSION=2024-07-01
+```
+
+The first Azure AI Search adapter expects retrievable fields named `id`, `title`, `source`, `url`, `product`, `scenario`, `sensitivity`, `modes`, `keywords`, and `content`.
+
+Seed the starter knowledge documents into the configured Azure AI Search index:
+
+```bash
+npm run seed:azure-search
+```
+
+Seeding requires an Azure AI Search admin key. Query keys can search documents but cannot upload them.
+
 ## Project Charter
 
 Read `SKILL.md` before meaningful project work. It defines the delivery phases, production-grade scorecard, engineering rules, debugging principles, security principles, work logging policy, and Conventional Commit policy.

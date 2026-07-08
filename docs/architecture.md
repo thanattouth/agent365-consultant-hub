@@ -4,7 +4,7 @@
 
 The current repository slice is a Next.js and TypeScript chat application with a typed API boundary, provider abstraction, deterministic local evaluation path, and Azure OpenAI as the normal runtime provider when configured.
 
-The live Azure OpenAI path now runs the local retrieval adapter before model execution. Matched trusted source snippets are passed into the model as grounding context, and the same sources are returned through the response contract as citations and retrieval trace metadata. This keeps the live path citation-aware until Azure AI Search replaces the local adapter.
+The live Azure OpenAI path now runs the configured retrieval provider before model execution. Matched trusted source snippets are passed into the model as grounding context, and the same sources are returned through the response contract as citations and retrieval trace metadata. The local retrieval provider supports deterministic evaluation, and Azure AI Search is available as the first live retrieval adapter.
 
 The local provider remains available for deterministic development, benchmark stability, red-team checks, and debugging.
 
@@ -14,7 +14,7 @@ The local provider remains available for deterministic development, benchmark st
 - API boundary: Next.js route handlers for chat request validation, provider routing, trace metadata, guardrail metadata, and sanitized error handling.
 - Agent runtime: Microsoft Foundry Agent Service where managed orchestration fits.
 - Model layer: Azure OpenAI today, with a future path to Microsoft Foundry Models where appropriate.
-- Retrieval: Local deterministic retrieval today, with Azure AI Search as the production citation-aware RAG target.
+- Retrieval: Local deterministic retrieval for evaluation and Azure AI Search as the production citation-aware RAG target.
 - Identity: Microsoft Entra ID.
 - State: Cosmos DB for conversations and agent state.
 - Storage: Azure Storage for uploads and indexed source files.
@@ -32,7 +32,7 @@ The local provider remains available for deterministic development, benchmark st
 
 ## Next Architecture Work
 
-- Replace the local retrieval adapter with Azure AI Search while preserving citation and trace contracts.
+- Add Azure AI Search ingestion, index management, and permission trimming for tenant-private sources.
 - Add managed identity support for Azure OpenAI or the selected Microsoft model service.
 - Add provider-specific live integration tests in a controlled environment.
 - Add policy-based hard blocks and human escalation for selected guardrail outcomes.
