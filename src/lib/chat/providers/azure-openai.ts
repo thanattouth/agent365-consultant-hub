@@ -254,18 +254,24 @@ async function callAzureOpenAiChatCompletions(
   const apiVersion = encodeURIComponent(config.apiVersion);
   const url = `${endpoint}/openai/deployments/${deployment}/chat/completions?api-version=${apiVersion}`;
 
-  const response = await fetch(url, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "api-key": config.apiKey,
-    },
-    body: JSON.stringify({
-      messages,
-      temperature: 0.3,
-      max_completion_tokens: 900,
-    }),
-  });
+  let response: Response;
+
+  try {
+    response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "api-key": config.apiKey,
+      },
+      body: JSON.stringify({
+        messages,
+        temperature: 0.3,
+        max_completion_tokens: 900,
+      }),
+    });
+  } catch {
+    throw new ChatProviderExecutionError("Azure OpenAI request could not be completed.");
+  }
 
   if (!response.ok) {
     const errorText = await response.text();
@@ -274,7 +280,13 @@ async function callAzureOpenAiChatCompletions(
     );
   }
 
-  const payload = (await response.json()) as AzureChatCompletionsResponse;
+  let payload: AzureChatCompletionsResponse;
+
+  try {
+    payload = (await response.json()) as AzureChatCompletionsResponse;
+  } catch {
+    throw new ChatProviderExecutionError("Azure OpenAI response was not valid JSON.");
+  }
   const content = payload.choices?.[0]?.message?.content?.trim();
 
   if (!content) {

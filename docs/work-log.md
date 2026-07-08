@@ -1,5 +1,31 @@
 # Work Log
 
+## 2026-07-08
+
+### Changed
+
+- Added an Azure OpenAI smoke evaluation script for the live `/api/chat` path.
+- Added `npm run eval:azure-smoke` to validate Azure provider routing, citation metadata, retrieval trace metadata, follow-up questions, and basic response redaction markers.
+- Wrapped Azure OpenAI network and invalid-JSON failures as provider execution errors so they return sanitized `502` responses instead of unhandled `500` responses.
+- Documented the live Azure smoke workflow in the README.
+
+### Why
+
+The Azure provider now performs live model execution with retrieval grounding, so the project needs a repeatable smoke check that confirms the runtime path still returns the expected production contract before deeper Azure AI Search work begins.
+
+### Verified
+
+- `npm.cmd run lint` passed.
+- `npm.cmd run typecheck` passed.
+- `npm.cmd run build` passed.
+- `npm.cmd run eval:azure-smoke` passed against a live Azure OpenAI configured local server with `provider: azure-openai`, 3 citations, and 3 retrieval results.
+- Sandbox-limited Azure execution returned a sanitized `502 provider_execution` failure instead of an unhandled `500`.
+
+### Risks And Follow-Up
+
+- The smoke script expects a running server with valid Azure OpenAI configuration.
+- It validates response contract metadata but does not grade answer quality or citation fidelity beyond expected source metadata.
+
 ## 2026-07-07
 
 ### Changed

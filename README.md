@@ -43,6 +43,15 @@ Run deterministic red-team guardrail checks:
 npm run eval:red-team
 ```
 
+Run a live Azure OpenAI smoke check against a running local server:
+
+```bash
+AGENT365_CHAT_PROVIDER=azure-openai npm run dev
+npm run eval:azure-smoke
+```
+
+The Azure smoke runner validates provider routing, citation metadata, retrieval trace metadata, and basic response redaction checks.
+
 ## Project Charter
 
 Read `SKILL.md` before meaningful project work. It defines the delivery phases, production-grade scorecard, engineering rules, debugging principles, security principles, work logging policy, and Conventional Commit policy.
